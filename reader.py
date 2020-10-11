@@ -1,3 +1,5 @@
+# Blueprint for reader module
+
 from flask import Blueprint, render_template
 from os.path import join
 from app import app
