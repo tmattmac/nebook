@@ -1,0 +1,20 @@
+{% extends 'auth_page.html' %}
+
+{% block form %}
+<h2>Log In</h2>
+<p>Don't have an account? Register here.</p>
+<hr>
+<form>
+  {% for msg in get_flashed_messages() %}
+    <div class="alert alert-danger">{{msg}}</div>
+  {% endfor %}
+  {{ form.hidden_tag() }}
+  {% for field in form if field.widget.input_type != 'hidden' %}
+    <div class="form-group">
+      {{field.label}}
+      {{field(class_='form-control')}}
+    </div>
+  {% endfor %}
+  <button class='btn btn-primary'>Login</button>
+</form>
+{% endblock %}
