@@ -1,4 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
+from flask_login import UserMixin
+from flask_bcrypt import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
 
@@ -6,13 +9,15 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
-class User(db.Model):
+class User(db.Model, UserMixin):
 
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
     username = db.Column(db.String(25), unique=True, nullable=False)
+
+    email = db.Column(db.Text, nullable=False)
 
     password = db.Column(db.Text, nullable=False)
 
@@ -22,6 +27,33 @@ class User(db.Model):
 
     # TODO: Add Flask authentication code
 
+    @classmethod
+    def authenticate_user(cls, username, password):
+        """Authenticate user with provided credentials"""
+
+        user = cls.query.filter_by(username=username).first()
+
+        if user is None or not check_password_hash(user.password, password):
+            return False
+
+        return user
+
+    @classmethod
+    def create_user(cls, username, email, password):
+        """Create a new user and attempt to add them to database"""
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=password
+        )
+        db.session.add(new_user)
+
+        try:
+            db.session.commit()
+            return new_user
+        except IntegrityError:
+            return False
 
 class Book(db.Model):
 
@@ -105,7 +137,7 @@ class Tag(db.Model):
 
 class UserBookTag(db.Model):
 
-    __tablename__ 'users_books_tags'
+    __tablename__ = 'users_books_tags'
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 
