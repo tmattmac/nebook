@@ -2,9 +2,9 @@
 
 {% block form %}
 <h2>Log In</h2>
-<p>Don't have an account? Register here.</p>
+<p>Don't have an account? <a href="{{url_for('register')}}">Register here.</a></p>
 <hr>
-<form>
+<form method="POST">
   {% for msg in get_flashed_messages() %}
     <div class="alert alert-danger">{{msg}}</div>
   {% endfor %}

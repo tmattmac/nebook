@@ -1,8 +1,18 @@
 from app import app
-from flask import flash, render_template, redirect, url_for
-from flask_login import login_required, login_user, logout_user
+from flask import flash, render_template, redirect, url_for, request, session
+from flask_login import LoginManager, login_required, login_user, logout_user
 from models import User
-from forms import *
+from forms import UserLoginForm, UserRegisterForm
+
+# Configure login manager
+app.config['USE_SESSION_FOR_NEXT'] = True
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -15,7 +25,11 @@ def login():
         if not user:
             flash('Invalid username or password')
             return redirect(url_for('login'))
+
         login_user(user, remember=True)
+
+        # TODO: Validate value of 'next'
+        next = session['next']
         return redirect(url_for('index'))
 
     return render_template('login.html', form=form)
