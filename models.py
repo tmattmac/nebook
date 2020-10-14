@@ -71,7 +71,7 @@ class Book(db.Model):
 
     publication_year = db.Column(db.Integer)
 
-    authors = db.relationship('authors', secondary='books_authors')
+    authors = db.relationship('Author', secondary='books_authors')
 
 
 class Author(db.Model):
@@ -100,7 +100,7 @@ class UserBook(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 
-    gdrive_id = db.Column(db.Integer, primary_key=True)
+    gdrive_id = db.Column(db.Text, primary_key=True, unique=True)
 
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
 
@@ -121,7 +121,7 @@ class CustomAuthor(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
 
-    book_id = db.Column(db.Integer, db.ForeignKey('users.book_id'), primary_key=True)
+    gdrive_id = db.Column(db.Text, db.ForeignKey('users_books.gdrive_id'), primary_key=True)
 
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
 
@@ -130,17 +130,17 @@ class Tag(db.Model):
 
     __tablename__ = 'tags'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    tag_name = db.Column(db.Text, nullable=False, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    tag_name = db.Column(db.Text, nullable=False)
 
 
-class UserBookTag(db.Model):
+class BookTag(db.Model):
 
-    __tablename__ = 'users_books_tags'
-
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    __tablename__ = 'books_tags'
 
     book_gdrive_id = db.Column(db.Text, db.ForeignKey('users_books.gdrive_id'), primary_key=True)
 
-    tag_name = db.Column(db.Text, db.ForeignKey('tags.tag_name'), primary_key=True)
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True)
