@@ -3,5 +3,21 @@
 {% block title %}Hello World!{% endblock %}
 
 {% block content %}
-<p>Hello world!</p>
+{{current_user.username}}<br>
+{{current_user.email}}
+
+{% if not current_user.gdrive_permission_granted %}
+
+<p>You will need to authorize access to Google Drive to manage your ebooks.<p>
+<a href="{{url_for('gdrive_authorize')}}" id="gdrive_authorize" class="btn btn-primary">Authorize</a>
+
+
+
+{% else %}
+  <form method="POST" action="/upload" enctype="multipart/form-data">
+    <input type="file" name="file" class="form-control">
+    <button class="btn btn-primary">Submit</button>
+  </form>
+  {{ file }}
+{% endif %}
 {% endblock %}

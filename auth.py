@@ -32,7 +32,7 @@ def login():
         next = session['next']
         return redirect(url_for('index'))
 
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -49,7 +49,7 @@ def register():
             return redirect(url_for('register'))
         login_user(user, remember=True)
         return redirect(url_for('index'))
-    return render_template('register.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 @app.route('/logout', methods=['POST'])
 @login_required

@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import array_agg
 from flask_login import UserMixin
 from flask_bcrypt import check_password_hash, generate_password_hash
 
@@ -25,7 +27,19 @@ class User(db.Model, UserMixin):
 
     gdrive_permission_granted = db.Column(db.Boolean)
 
-    # TODO: Add Flask authentication code
+    books = db.relationship('UserBook', primaryjoin='User.id==UserBook.user_id')
+
+    def add_book(self, book_id, gdrive_id):
+
+        new_book = UserBook(
+            user_id=self.id,
+            book_id=book_id,
+            gdrive_id=gdrive_id
+        )
+        db.session.add(new_book)
+        db.session.commit()
+
+        
 
     @classmethod
     def authenticate_user(cls, username, password):
@@ -45,7 +59,7 @@ class User(db.Model, UserMixin):
         new_user = User(
             username=username,
             email=email,
-            password=password
+            password=generate_password_hash(password)
         )
         db.session.add(new_user)
 
@@ -114,6 +128,23 @@ class UserBook(db.Model):
 
     publication_year = db.Column(db.Integer)
 
+    book = db.relationship('Book',
+        primaryjoin='UserBook.book_id==Book.id',
+        lazy='noload')
+
+    authors = db.relationship('Author',
+        secondary='books_authors',
+        primaryjoin='UserBook.book_id==BookAuthor.book_id',
+        secondaryjoin='BookAuthor.author_id==Author.id')
+
+    custom_authors = db.relationship('Author',
+        secondary='custom_authors',
+        primaryjoin='and_(UserBook.gdrive_id==CustomAuthor.gdrive_id, \
+                            UserBook.user_id==CustomAuthor.user_id)',
+        secondaryjoin='CustomAuthor.author_id==Author.id')
+
+    def get_authors(self):
+        return custom_authors or authors
 
 class CustomAuthor(db.Model):
 
