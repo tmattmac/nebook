@@ -22,7 +22,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # TODO: Disable in production
 
 
 connect_db(app)
-# db.create_all()
+db.create_all()
 
 import auth
 
@@ -39,7 +39,7 @@ def index():
     credentials = google.oauth2.credentials.Credentials(
         **session['credentials'])
 
-    files=current_user.get_books()
+    files=current_user.books
 
     # TODO: Store folder ID in session
     #folderId = gdrive.get_app_folder_id(credentials)
@@ -73,16 +73,15 @@ def upload_ebook_file():
             author = authors[0]
     except RuntimeError:
         return redirect(url_for('index'))
-    
 
     book_info = gbooks.get_book_by_title_author(title, author)
     book_gdrive_id = gdrive.generate_file_id(credentials)
     gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
 
-    book = book_model_from_api_data(book_info)
+    book = book_model_from_api_data(current_user.id, book_info)
+    book.gdrive_id = book_gdrive_id
     db.session.add(book)
     db.session.commit()
-    current_user.add_book(book.id, book_gdrive_id)
 
     return render_template('index.html', file=book_info)
 

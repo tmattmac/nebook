@@ -69,39 +69,22 @@ class User(db.Model, UserMixin):
         except IntegrityError:
             return False
 
-class Book(db.Model):
-
-    __tablename__ = 'books'
-
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-
-    gbooks_id = db.Column(db.Text, unique=True)
-
-    title = db.Column(db.Text, nullable=False)
-
-    subtitle = db.Column(db.Text)
-
-    publisher = db.Column(db.Text)
-
-    publication_year = db.Column(db.Integer)
-
-    authors = db.relationship('Author', secondary='books_authors')
-
-
 class Author(db.Model):
 
     __tablename__ = 'authors'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    name = db.Column(db.Text, unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    name = db.Column(db.Text, nullable=False)
 
 
 class BookAuthor(db.Model):
 
     __tablename__ = 'books_authors'
 
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), primary_key=True)
+    book_gdrive_id = db.Column(db.Text, db.ForeignKey('users_books.gdrive_id'), primary_key=True)
 
     author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
 
@@ -116,11 +99,13 @@ class UserBook(db.Model):
 
     gdrive_id = db.Column(db.Text, primary_key=True, unique=True)
 
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
+    gbooks_id = db.Column(db.Text)
 
     comments = db.Column(db.Text)
 
     progress_percentage = db.Column(db.Float, default=0.0)
+
+    last_read = db.Column(db.DateTime)
 
     title = db.Column(db.Text)
 
@@ -128,33 +113,11 @@ class UserBook(db.Model):
 
     publication_year = db.Column(db.Integer)
 
-    book = db.relationship('Book',
-        primaryjoin='UserBook.book_id==Book.id',
-        lazy='noload')
-
     authors = db.relationship('Author',
         secondary='books_authors',
-        primaryjoin='UserBook.book_id==BookAuthor.book_id',
-        secondaryjoin='BookAuthor.author_id==Author.id')
-
-    custom_authors = db.relationship('Author',
-        secondary='custom_authors',
-        primaryjoin='and_(UserBook.gdrive_id==CustomAuthor.gdrive_id, \
-                            UserBook.user_id==CustomAuthor.user_id)',
-        secondaryjoin='CustomAuthor.author_id==Author.id')
-
-    def get_authors(self):
-        return custom_authors or authors
-
-class CustomAuthor(db.Model):
-
-    __tablename__ = 'custom_authors'
-
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-
-    gdrive_id = db.Column(db.Text, db.ForeignKey('users_books.gdrive_id'), primary_key=True)
-
-    author_id = db.Column(db.Integer, db.ForeignKey('authors.id'), primary_key=True)
+        primaryjoin='UserBook.gdrive_id==BookAuthor.book_gdrive_id',
+        secondaryjoin = 'and_(BookAuthor.author_id==Author.id, \
+                        UserBook.user_id==Author.user_id)')
 
 
 class Tag(db.Model):
