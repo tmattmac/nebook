@@ -29,6 +29,34 @@ import auth
 from reader import reader
 app.register_blueprint(reader, url_prefix='/reader')
 
+def build_query(**kwargs):
+    """
+    Build a query on books based on provided query parameters
+    q       search query (not yet implemented)
+    pg      page of results (default: 1)
+    per_pg  number of results to show per page (default: 20)
+    author  filter by author with specified id
+    sort    name of column to sort by (default: title)
+    """
+    # TODO: Get items per page from user preferences
+    pg = kwargs.get('pg', 1) - 1
+    per_pg = kwargs.get('per_pg', 20)
+    sort = kwargs.get('sort', 'title')
+    author = kwargs.get('author')
+
+    if author:
+        query = db.session.query(UserBook).join(UserBook.authors).filter(Author.id==author)
+    else:
+        query = UserBook.query
+
+    count = query.count()
+
+    query = query\
+            .limit(per_pg)\
+            .offset(pg * per_pg)
+
+    return query.all(), count
+
 @app.route('/')
 @login_required
 def index():
@@ -39,7 +67,7 @@ def index():
     credentials = google.oauth2.credentials.Credentials(
         **session['credentials'])
 
-    files=current_user.books
+    books, count = build_query(**request.args)
 
     # TODO: Store folder ID in session
     #folderId = gdrive.get_app_folder_id(credentials)
@@ -50,7 +78,7 @@ def index():
     # file = gdrive.download_file(credentials, files[0])
     # epub = EpubBook(file)
 
-    return render_template('index.html', file=files)
+    return render_template('index.html', books=books, books_count=count)
 
 @app.route('/upload', methods=['POST'])
 @login_required
@@ -75,15 +103,19 @@ def upload_ebook_file():
         return redirect(url_for('index'))
 
     book_info = gbooks.get_book_by_title_author(title, author)
-    book_gdrive_id = gdrive.generate_file_id(credentials)
-    gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
+
+    #--------------DISABLED FOR DEVELOPMENT------------------------------------
+    # book_gdrive_id = gdrive.generate_file_id(credentials)
+    # gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
+    book_gdrive_id = book_info.get('id')
+    #--------------------------------------------------------------------------
 
     book = book_model_from_api_data(current_user.id, book_info)
     book.gdrive_id = book_gdrive_id
     db.session.add(book)
     db.session.commit()
 
-    return render_template('index.html', file=book_info)
+    return redirect(url_for('index'))
 
 @app.route('/gdrive-authorize')
 @login_required

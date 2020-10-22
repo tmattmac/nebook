@@ -79,6 +79,12 @@ class Author(db.Model):
 
     name = db.Column(db.Text, nullable=False)
 
+    books = db.relationship('UserBook',
+        secondary='books_authors',
+        primaryjoin='BookAuthor.author_id==Author.id',
+        secondaryjoin = 'and_(UserBook.gdrive_id==BookAuthor.book_gdrive_id, \
+                        UserBook.user_id == Author.user_id) ',
+        back_populates='authors')
 
 class BookAuthor(db.Model):
 
@@ -117,7 +123,8 @@ class UserBook(db.Model):
         secondary='books_authors',
         primaryjoin='UserBook.gdrive_id==BookAuthor.book_gdrive_id',
         secondaryjoin = 'and_(BookAuthor.author_id==Author.id, \
-                        UserBook.user_id==Author.user_id)')
+                        UserBook.user_id == Author.user_id) ',
+        back_populates='books')
 
 
 class Tag(db.Model):

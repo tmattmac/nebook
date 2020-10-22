@@ -1,5 +1,6 @@
 from lib import epubtag
 from models import *
+from sqlalchemy import and_
 import gdrive
 import gbooks
 

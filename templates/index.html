@@ -36,7 +36,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for book in current_user.books %}
+      {% for book in books %}
         <tr>
           <td>{{book.title}}</td>
           <td>{{author_list(book.authors)}}</td>
