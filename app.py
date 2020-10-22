@@ -1,5 +1,6 @@
 from flask import Flask, flash, request, redirect, render_template, session, url_for
 from models import db, connect_db
+from sqlalchemy import desc
 from flask_login import LoginManager, login_required, current_user
 from models import *
 import os
@@ -42,12 +43,21 @@ def build_query(**kwargs):
     pg = kwargs.get('pg', 1) - 1
     per_pg = kwargs.get('per_pg', 20)
     sort = kwargs.get('sort', 'title')
+    order = kwargs.get('order', 'asc')
     author = kwargs.get('author')
 
     if author:
         query = db.session.query(UserBook).join(UserBook.authors).filter(Author.id==author)
     else:
         query = UserBook.query
+
+    if sort not in UserBook.__table__.columns.keys():
+        sort = 'title'
+
+    if order == 'desc':
+        query = query.order_by(desc(sort))
+    else:
+        query = query.order_by(sort)
 
     count = query.count()
 

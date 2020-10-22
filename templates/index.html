@@ -8,6 +8,21 @@
   </ul>
 {% endmacro %}
 
+{% macro column_header(column_name, label) %}
+  {# Set url parameters for sorting by columns #}
+  {% set args = dict(request.args) %}
+  {% if args.sort == column_name %}
+    {% if args.order == 'desc' %}
+      {% set _ = args.update({'order': 'asc'}) %}
+    {% else %}
+      {% set _ = args.update({'order': 'desc'}) %}
+    {% endif %}
+  {% else %}
+    {% set _ = args.update({'sort': column_name}) %}
+  {% endif %}
+  <th scope="col"><a href="{{url_for('index', **args)}}">{{label}}</a></th>
+{% endmacro %}
+
 {% block title %}Hello World!{% endblock %}
 
 {% block content %}
@@ -29,9 +44,9 @@
   <table class="table">
     <thead>
       <tr>
-        <th scope="col">Title</th>
+        {{column_header('title', 'Title')}}
         <th scope="col">Authors</th>
-        <th scope="col">Publisher</th>
+        {{column_header('publisher', 'Publisher')}}
         <th scope="col">Read Link</th>
       </tr>
     </thead>
