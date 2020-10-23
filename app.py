@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_required, current_user
 from models import *
 import os
 from sync import book_model_from_api_data
+from forms import EditBookDetailForm
 
 # TODO: Refactor Gdrive functions to new file
 import google.oauth2.credentials
@@ -39,19 +40,25 @@ def build_query(**kwargs):
     author  filter by author with specified id
     sort    name of column to sort by (default: title)
     """
+    SORT_FIELDS = ['title', 'publisher', 'publication_year', 'author', 'last_read']
+
     # TODO: Get items per page from user preferences
+    # TODO: Add tag filtering
     pg = kwargs.get('pg', 1) - 1
     per_pg = kwargs.get('per_pg', 20)
     sort = kwargs.get('sort', 'title')
     order = kwargs.get('order', 'asc')
     author = kwargs.get('author')
+    tag = kwargs.get('tag')
 
     if author:
-        query = db.session.query(UserBook).join(UserBook.authors).filter(Author.id==author)
+        query = db.session.query(UserBook).join(UserBook.authors).filter(Author.id == author)
+    elif tag:
+        query = db.session.query(UserBook).join(UserBook.tags).filter(Tag.id == tag)
     else:
         query = UserBook.query
 
-    if sort not in UserBook.__table__.columns.keys():
+    if sort not in SORT_FIELDS:
         sort = 'title'
 
     if order == 'desc':
@@ -89,6 +96,53 @@ def index():
     # epub = EpubBook(file)
 
     return render_template('index.html', books=books, books_count=count)
+
+@app.route('/book/<book_id>')
+@login_required
+def book_details(book_id):
+    book = UserBook.query.get_or_404({
+        'user_id': current_user.id,
+        'gdrive_id': book_id
+    })
+    
+    return render_template('book/details.html', book=book)
+
+@app.route('/book/<book_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_book_details(book_id):
+    book = UserBook.query.get_or_404({
+        'user_id': current_user.id,
+        'gdrive_id': book_id
+    })
+    form = EditBookDetailForm(obj=book)
+    if form.validate_on_submit():
+        # TODO: Wrap in try-catch
+        update_book_with_form_data(book, form)
+        return redirect(url_for('book_details', book_id=book.gdrive_id))
+
+    return render_template('book/edit_details.html', book=book, form=form)
+
+def update_book_with_form_data(book_instance, form):
+    book = {
+        'title':            form.title.data,
+        'publisher':        form.publisher.data,
+        'publication_year': form.publication_year.data,
+        'comments':         form.comments.data,
+        'authors':          [],
+        'tags':             []
+    }
+    for author_name in form.authors.data:
+        author = get_or_create(Author, name=author_name, user_id=current_user.id)
+        book['authors'].append(author)
+    for tag_name in form.tags.data:
+        tag = get_or_create(Tag, tag_name=tag_name, user_id=current_user.id)
+        book['tags'].append(tag)
+
+    for k, v in book.items():
+        setattr(book_instance, k, v)
+
+    db.session.add(book_instance)
+    db.session.commit()
 
 @app.route('/upload', methods=['POST'])
 @login_required

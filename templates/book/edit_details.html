@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Edit details for {{book.title}}
+{% endblock %}
+
+{% block content %}
+
+<h2>Edit details for {{book.title}}</h2>
+
+<form method="POST">
+{{ form.hidden_tag() }}
+{% for field in form %}
+  {% if field.widget.input_type != 'hidden' %}
+    <div class="form-group">
+      {{field.label}}
+      {{field(class_='form-control')}}
+    </div>
+  {% endif %}
+{% endfor %}
+  <button type="submit" class="btn btn-primary">Save</button>
+  <a class="btn btn-light" href="{{url_for('book_details', book_id=book.gdrive_id)}}">Cancel</a>
+</form>
+{% endblock %}

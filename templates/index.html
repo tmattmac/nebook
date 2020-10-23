@@ -1,9 +1,17 @@
 {% extends 'base.html' %}
 
 {% macro author_list(authors) %}
-  <ul>
+  <ul class="inline-comma-list">
   {% for author in authors %}
-    <li class="author"><a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a></li>
+    <li><a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a></li>
+  {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro tag_list(tags) %}
+  <ul class="inline-comma-list">
+  {% for tag in tags %}
+    <li><a href="{{url_for('index', tag=tag.id)}}"">{{tag.tag_name}}</a></li>
   {% endfor %}
   </ul>
 {% endmacro %}
@@ -46,16 +54,16 @@
       <tr>
         {{column_header('title', 'Title')}}
         <th scope="col">Authors</th>
-        {{column_header('publisher', 'Publisher')}}
+        <th scope="col">Tags</th>
         <th scope="col">Read Link</th>
       </tr>
     </thead>
     <tbody>
       {% for book in books %}
         <tr>
-          <td>{{book.title}}</td>
+          <td><a href="{{url_for('book_details', book_id=book.gdrive_id)}}">{{book.title}}</a></td>
           <td>{{author_list(book.authors)}}</td>
-          <td>{{book.publisher}}</td>
+          <td>{{tag_list(book.tags)}}</td>
           <td><a href="{{url_for('reader.reader_view', id=book.gdrive_id)}}">Read</a></td>
         </tr>
       {% endfor %}

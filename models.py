@@ -11,6 +11,13 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
+def get_or_create(model, **kwargs):
+    instance = model.query.filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        return model(**kwargs)
+
 class User(db.Model, UserMixin):
 
     __tablename__ = 'users'
@@ -84,7 +91,10 @@ class Author(db.Model):
         primaryjoin='BookAuthor.author_id==Author.id',
         secondaryjoin = 'and_(UserBook.gdrive_id==BookAuthor.book_gdrive_id, \
                         UserBook.user_id == Author.user_id) ',
-        back_populates='authors')
+        back_populates = 'authors')
+        
+    def __str__(self):
+        return self.name
 
 class BookAuthor(db.Model):
 
@@ -126,6 +136,11 @@ class UserBook(db.Model):
                         UserBook.user_id == Author.user_id) ',
         back_populates='books')
 
+    tags = db.relationship('Tag',
+        secondary='books_tags',
+        primaryjoin='UserBook.gdrive_id==BookTag.book_gdrive_id',
+        secondaryjoin='BookTag.tag_id==Tag.id',
+        back_populates='books')
 
 class Tag(db.Model):
 
@@ -137,6 +152,15 @@ class Tag(db.Model):
 
     tag_name = db.Column(db.Text, nullable=False)
 
+    books = db.relationship('UserBook',
+        secondary='books_tags',
+        primaryjoin='BookTag.tag_id==Tag.id',
+        secondaryjoin = 'and_(UserBook.gdrive_id==BookTag.book_gdrive_id, \
+                        UserBook.user_id == Tag.user_id) ',
+        back_populates='tags')
+
+    def __str__(self):
+        return self.tag_name
 
 class BookTag(db.Model):
 
