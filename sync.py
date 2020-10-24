@@ -13,12 +13,17 @@ def parse_year(date_string):
 def book_model_from_api_data(user_id, api_data):
 
     metadata = api_data['volumeInfo']
+    thumbnails = metadata.get('imageLinks')
+    cover_image = None
+    if thumbnails:
+        cover_image = thumbnails.get('thumbnail')
     book = UserBook(
         user_id=user_id,
         gbooks_id=api_data['id'],
         title=metadata.get('title'),
         publisher=metadata.get('publisher'),
-        publication_year=parse_year(metadata.get('publishedDate'))
+        publication_year=parse_year(metadata.get('publishedDate')),
+        cover_image=cover_image
     )
 
     # Create any authors not already in database

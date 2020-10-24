@@ -66,7 +66,7 @@ class User(db.Model, UserMixin):
         new_user = User(
             username=username,
             email=email,
-            password=generate_password_hash(password)
+            password=generate_password_hash(password).decode('utf-8')
         )
         db.session.add(new_user)
 
@@ -116,6 +116,8 @@ class UserBook(db.Model):
     gdrive_id = db.Column(db.Text, primary_key=True, unique=True)
 
     gbooks_id = db.Column(db.Text)
+
+    cover_image = db.Column(db.Text)
 
     comments = db.Column(db.Text)
 

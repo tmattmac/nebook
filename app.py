@@ -1,6 +1,6 @@
 from flask import Flask, flash, request, redirect, render_template, session, url_for
 from models import db, connect_db
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from flask_login import LoginManager, login_required, current_user
 from models import *
 import os
@@ -20,8 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///book_project'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = 'somesecretkey'
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # TODO: Disable in production
-
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # TODO: Disable in production
 
 connect_db(app)
 db.create_all()
@@ -40,26 +39,27 @@ def build_query(**kwargs):
     author  filter by author with specified id
     sort    name of column to sort by (default: title)
     """
-    SORT_FIELDS = ['title', 'publisher', 'publication_year', 'author', 'last_read']
+    SORT_FIELDS = ['title', 'publisher', 'publication_year', 'last_read']
 
     # TODO: Get items per page from user preferences
     # TODO: Add tag filtering
     pg = kwargs.get('pg', 1) - 1
     per_pg = kwargs.get('per_pg', 20)
-    sort = kwargs.get('sort', 'title')
-    order = kwargs.get('order', 'asc')
+    sort = kwargs.get('sort')
+    order = kwargs.get('order')
     author = kwargs.get('author')
     tag = kwargs.get('tag')
 
-    if author:
-        query = db.session.query(UserBook).join(UserBook.authors).filter(Author.id == author)
-    elif tag:
-        query = db.session.query(UserBook).join(UserBook.tags).filter(Tag.id == tag)
-    else:
-        query = UserBook.query
+    query = db.session.query(UserBook).filter(UserBook.user_id == current_user.id)
 
-    if sort not in SORT_FIELDS:
-        sort = 'title'
+    if author:
+        query = query.join(UserBook.authors).filter(Author.id == author)
+    elif tag:
+        query = query.join(UserBook.tags).filter(Tag.id == tag)
+
+    if not sort or sort not in SORT_FIELDS:
+        sort = 'last_read'
+        order = 'desc'
 
     if order == 'desc':
         query = query.order_by(desc(sort))
@@ -144,7 +144,7 @@ def update_book_with_form_data(book_instance, form):
     db.session.add(book_instance)
     db.session.commit()
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload_ebook_file():
     if 'credentials' not in session:
@@ -152,6 +152,9 @@ def upload_ebook_file():
 
     credentials = google.oauth2.credentials.Credentials(
         **session['credentials'])
+
+    if request.method == 'GET':
+        return render_template('book/upload.html')
 
     file = request.files['file']
 
@@ -164,6 +167,7 @@ def upload_ebook_file():
         if len(authors) > 0:
             author = authors[0]
     except RuntimeError:
+        flash('Not a valid ebook file', 'danger')
         return redirect(url_for('index'))
 
     book_info = gbooks.get_book_by_title_author(title, author)
@@ -171,7 +175,7 @@ def upload_ebook_file():
     #--------------DISABLED FOR DEVELOPMENT------------------------------------
     # book_gdrive_id = gdrive.generate_file_id(credentials)
     # gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
-    book_gdrive_id = book_info.get('id')
+    book_gdrive_id = str(current_user.id) + book_info.get('id')
     #--------------------------------------------------------------------------
 
     book = book_model_from_api_data(current_user.id, book_info)
@@ -179,7 +183,7 @@ def upload_ebook_file():
     db.session.add(book)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    return redirect(url_for('edit_book_details', book_id=book.gdrive_id))
 
 @app.route('/gdrive-authorize')
 @login_required
