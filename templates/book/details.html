@@ -5,46 +5,50 @@
 {% endblock %}
 
 {% block content %}
+<div class="row">
+  <div class="col-lg-3"><img class="img-fluid" src="{{book.cover_image}}"></div>
+  <div class="col-lg-9">
+    <h2>{{book.title}}</h2>
+    <table class="table">
+      <tr>
+        <td>Author(s)</td>
+        <td>
+          <ul>
+            {% for author in book.authors %}
+              <li><a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a></li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>Publisher</td>
+        <td><a href="{{url_for('index', publisher=publisher)}}"">{{book.publisher}}</a></td>
+      </tr>
+      <tr>
+        <td>Publication Year</td>
+        <td>{{book.publication_year}}</td>
+      </tr>
+      <tr>
+        <td>Tags</td>
+        <td>
+          <ul>
+            {% for tag in book.tags %}
+              <li><a href="{{url_for('index', tag=tag.id)}}"">{{tag.tag_name}}</a></li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>Comments</td>
+        <td>{{book.comments if book.comments is not none}}</td>
+      </tr>
+      <tr>
+        <td>Last Read</td>
+        <td>{{book.last_read if book.last_read is not none else 'Never'}}</td>
+      </tr>
 
-<h2>{{book.title}}</h2>
-<table class="table">
-  <tr>
-    <td>Author(s)</td>
-    <td>
-      <ul>
-        {% for author in book.authors %}
-          <li><a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a></li>
-        {% endfor %}
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td>Publisher</td>
-    <td><a href="{{url_for('index', publisher=publisher)}}"">{{book.publisher}}</a></td>
-  </tr>
-  <tr>
-    <td>Publication Year</td>
-    <td>{{book.publication_year}}</td>
-  </tr>
-  <tr>
-    <td>Tags</td>
-    <td>
-      <ul>
-        {% for tag in book.tags %}
-          <li><a href="{{url_for('index', tag=tag.id)}}"">{{tag.tag_name}}</a></li>
-        {% endfor %}
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td>Comments</td>
-    <td>{{book.comments if book.comments is not none}}</td>
-  </tr>
-  <tr>
-    <td>Last Read</td>
-    <td>{{book.last_read if book.last_read is not none else 'Never'}}</td>
-  </tr>
-
-</table>
-<a class="btn btn-primary" href="{{url_for('edit_book_details', book_id=book.gdrive_id)}}">Edit Details</a>
+    </table>
+    <a class="btn btn-primary" href="{{url_for('edit_book_details', book_id=book.gdrive_id)}}">Edit Details</a>
+  </div>
+</div>
 {% endblock %}

@@ -1,0 +1,36 @@
+{% macro author_list(authors, with_links=False) %}
+  <ul class="inline-comma-list">
+  {% for author in authors %}
+    <li>
+      {% if with_links %}
+        <a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a>
+      {% else %}
+        {{author.name}}
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro tag_list(tags) %}
+  <ul class="inline-comma-list">
+  {% for tag in tags %}
+    <li><a href="{{url_for('index', tag=tag.id)}}">{{tag.tag_name}}</a></li>
+  {% endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro column_header(column_name, label) %}
+  {# Set url parameters for sorting by columns #}
+  {% set args = dict(request.args) %}
+  {% if args.sort == column_name %}
+    {% if args.order == 'desc' %}
+      {% set _ = args.update({'order': 'asc'}) %}
+    {% else %}
+      {% set _ = args.update({'order': 'desc'}) %}
+    {% endif %}
+  {% else %}
+    {% set _ = args.update({'sort': column_name}) %}
+  {% endif %}
+  <th scope="col"><a href="{{url_for('index', **args)}}">{{label}}</a></th>
+{% endmacro %}

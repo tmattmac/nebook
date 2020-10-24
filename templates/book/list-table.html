@@ -1,0 +1,22 @@
+{% from 'macros.html' import author_list, tag_list %}
+
+<table class="table">
+  <thead>
+    <tr>
+      {{column_header('title', 'Title')}}
+      <th scope="col">Authors</th>
+      <th scope="col">Tags</th>
+      <th scope="col">Read Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for book in books %}
+      <tr>
+        <td><a href="{{url_for('book_details', book_id=book.gdrive_id)}}">{{book.title}}</a></td>
+        <td>{{author_list(book.authors)}}</td>
+        <td>{{tag_list(book.tags)}}</td>
+        <td><a href="{{url_for('reader.reader_view', id=book.gdrive_id)}}">Read</a></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

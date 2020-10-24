@@ -1,74 +1,23 @@
 {% extends 'base.html' %}
 
-{% macro author_list(authors) %}
-  <ul class="inline-comma-list">
-  {% for author in authors %}
-    <li><a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a></li>
-  {% endfor %}
-  </ul>
-{% endmacro %}
-
-{% macro tag_list(tags) %}
-  <ul class="inline-comma-list">
-  {% for tag in tags %}
-    <li><a href="{{url_for('index', tag=tag.id)}}"">{{tag.tag_name}}</a></li>
-  {% endfor %}
-  </ul>
-{% endmacro %}
-
-{% macro column_header(column_name, label) %}
-  {# Set url parameters for sorting by columns #}
-  {% set args = dict(request.args) %}
-  {% if args.sort == column_name %}
-    {% if args.order == 'desc' %}
-      {% set _ = args.update({'order': 'asc'}) %}
-    {% else %}
-      {% set _ = args.update({'order': 'desc'}) %}
-    {% endif %}
-  {% else %}
-    {% set _ = args.update({'sort': column_name}) %}
-  {% endif %}
-  <th scope="col"><a href="{{url_for('index', **args)}}">{{label}}</a></th>
-{% endmacro %}
+{% from 'macros.html' import author_list, tag_list, column_header %}
 
 {% block title %}Hello World!{% endblock %}
 
 {% block content %}
-{{current_user.username}}<br>
-{{current_user.email}}
-
 {% if not current_user.gdrive_permission_granted %}
-
-<p>You will need to authorize access to Google Drive to manage your ebooks.<p>
-<a href="{{url_for('gdrive_authorize')}}" id="gdrive_authorize" class="btn btn-primary">Authorize</a>
-
-
-
+  <p>You will need to authorize access to Google Drive to manage your ebooks.<p>
+  <a href="{{url_for('gdrive_authorize')}}" id="gdrive_authorize" class="btn btn-primary">Authorize</a>
 {% else %}
-  <form method="POST" action="/upload" enctype="multipart/form-data">
-    <input type="file" name="file" class="form-control">
-    <button class="btn btn-primary">Submit</button>
-  </form>
-  <table class="table">
-    <thead>
-      <tr>
-        {{column_header('title', 'Title')}}
-        <th scope="col">Authors</th>
-        <th scope="col">Tags</th>
-        <th scope="col">Read Link</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for book in books %}
-        <tr>
-          <td><a href="{{url_for('book_details', book_id=book.gdrive_id)}}">{{book.title}}</a></td>
-          <td>{{author_list(book.authors)}}</td>
-          <td>{{tag_list(book.tags)}}</td>
-          <td><a href="{{url_for('reader.reader_view', id=book.gdrive_id)}}">Read</a></td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {{ file }}
+  {% if books %}
+    {% if request.args.view == 'list' %}
+      {% include 'book/list-table.html' %}
+    {% else %}
+      {% include 'book/list-grid.html' %}
+    {% endif %}
+  {% else %}
+    <p class="text-center">There are currently no books in your library.</p>
+    <a class="btn btn-primary" href="/upload">Upload Book</a>
+  {% endif %}
 {% endif %}
 {% endblock %}
