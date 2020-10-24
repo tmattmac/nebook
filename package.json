@@ -1,0 +1,33 @@
+{
+  "name": "untitled-book-project",
+  "version": "1.0.0",
+  "description": "No progress yet. See proposal [here](meta/proposal.md)",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build-js && npm run build-sass",
+    "build-js": "browserify js/app.js -o static/js/app.js",
+    "build-sass": "sass scss/styles.scss static/css/styles.css",
+    "watch": "sass --watch scss/styles.scss static/css/styles.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmattmac/untitled-book-project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tmattmac/untitled-book-project/issues"
+  },
+  "homepage": "https://github.com/tmattmac/untitled-book-project#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.0.1",
+    "bootstrap": "^4.5.3",
+    "browserify": "^17.0.0",
+    "jquery": "^3.5.1",
+    "sass": "^1.27.0"
+  }
+}

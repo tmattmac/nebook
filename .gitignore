@@ -4,3 +4,4 @@ __pycache__/
 *.zip
 secrets.py
 client_secret.json
+node_modules/
