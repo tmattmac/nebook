@@ -134,8 +134,7 @@ class UserBook(db.Model):
     authors = db.relationship('Author',
         secondary='books_authors',
         primaryjoin='UserBook.gdrive_id==BookAuthor.book_gdrive_id',
-        secondaryjoin = 'and_(BookAuthor.author_id==Author.id, \
-                        UserBook.user_id == Author.user_id) ',
+        secondaryjoin = 'BookAuthor.author_id==Author.id',
         back_populates='books')
 
     tags = db.relationship('Tag',
