@@ -9896,5 +9896,28 @@ h3 {
     border-color: #dee2e6;
   }
 }
+.flush-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.inline-comma-list {
+  display: inline;
+  list-style: none;
+  padding: 0;
+}
+
+.inline-comma-list li {
+  display: inline;
+}
+
+.inline-comma-list li::after {
+  content: ", ";
+}
+
+.inline-comma-list li:last-child::after {
+  content: "";
+}
 
 /*# sourceMappingURL=styles.css.map */

@@ -1,11 +1,9 @@
 from flask import Flask, flash, request, redirect, render_template, session, url_for
-from models import db, connect_db
-from sqlalchemy import desc, func
 from flask_login import LoginManager, login_required, current_user
 from models import *
 import os
 from sync import book_model_from_api_data
-from forms import EditBookDetailForm
+from forms import EditBookDetailForm, BookSearchForm
 
 # TODO: Refactor Gdrive functions to new file
 import google.oauth2.credentials
@@ -20,7 +18,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///book_project'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = 'somesecretkey'
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # TODO: Disable in production
+
+# TODO: Disable these in production
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 connect_db(app)
 db.create_all()
@@ -28,51 +29,9 @@ db.create_all()
 import auth
 
 from reader import reader
+from services import ajax, build_query
 app.register_blueprint(reader, url_prefix='/reader')
-
-def build_query(**kwargs):
-    """
-    Build a query on books based on provided query parameters
-    q       search query (not yet implemented)
-    pg      page of results (default: 1)
-    per_pg  number of results to show per page (default: 20)
-    author  filter by author with specified id
-    sort    name of column to sort by (default: title)
-    """
-    SORT_FIELDS = ['title', 'publisher', 'publication_year', 'last_read']
-
-    # TODO: Get items per page from user preferences
-    # TODO: Add tag filtering
-    pg = kwargs.get('pg', 1) - 1
-    per_pg = kwargs.get('per_pg', 20)
-    sort = kwargs.get('sort')
-    order = kwargs.get('order')
-    author = kwargs.get('author')
-    tag = kwargs.get('tag')
-
-    query = db.session.query(UserBook).filter(UserBook.user_id == current_user.id)
-
-    if author:
-        query = query.join(UserBook.authors).filter(Author.id == author)
-    elif tag:
-        query = query.join(UserBook.tags).filter(Tag.id == tag)
-
-    if not sort or sort not in SORT_FIELDS:
-        sort = 'last_read'
-        order = 'desc'
-
-    if order == 'desc':
-        query = query.order_by(desc(sort))
-    else:
-        query = query.order_by(sort)
-
-    count = query.count()
-
-    query = query\
-            .limit(per_pg)\
-            .offset(pg * per_pg)
-
-    return query.all(), count
+app.register_blueprint(ajax, url_prefix='/api')
 
 @app.route('/')
 @login_required
@@ -86,6 +45,13 @@ def index():
 
     books, count = build_query(**request.args)
 
+    form = BookSearchForm(
+        csrf_enabled=False,
+        data=request.args
+    )
+
+    session['view'] = request.args.get('view') or session.get('view', 'grid')
+
     # TODO: Store folder ID in session
     #folderId = gdrive.get_app_folder_id(credentials)
     #files = gdrive.get_all_epub_file_ids(credentials)
@@ -95,7 +61,7 @@ def index():
     # file = gdrive.download_file(credentials, files[0])
     # epub = EpubBook(file)
 
-    return render_template('index.html', books=books, books_count=count)
+    return render_template('index.html', books=books, books_count=count, form=form)
 
 @app.route('/book/<book_id>')
 @login_required

@@ -1,1 +1,25 @@
 @import "../node_modules/bootstrap/scss/bootstrap";
+
+.flush-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.inline-comma-list {
+    display: inline;
+    list-style: none;
+    padding: 0;
+}
+
+.inline-comma-list li {
+    display: inline;
+}
+
+.inline-comma-list li::after {
+    content: ", ";
+}
+
+.inline-comma-list li:last-child::after {
+    content: "";
+}

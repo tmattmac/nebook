@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, IntegerField, TextAreaField
+from wtforms import StringField, PasswordField, IntegerField, TextAreaField, SelectField, HiddenField
 from lib.wtf_taglist import TagListField
 from wtforms.validators import Length, DataRequired, Email, NumberRange
 from datetime import datetime
@@ -52,3 +52,13 @@ class EditBookDetailForm(FlaskForm):
     comments = TextAreaField('Comments')
 
     tags = TagListField('Tags', separator=',')
+
+class BookSearchForm(FlaskForm):
+
+    q = StringField()
+    sort = SelectField(choices=[
+        ('last_read', 'Last Read'),
+        ('title', 'Title'),
+        ('publisher', 'Publisher'),
+        ('publication_year', 'Year')
+    ])
