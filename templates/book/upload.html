@@ -3,8 +3,9 @@
 {% block title %}Upload Book{% endblock %}
 
 {% block content %}
+<h2>Upload Book</h2>
 <form method="POST" action="/upload" enctype="multipart/form-data">
-  <input type="file" name="file" class="form-control">
+  <input type="file" name="file" class="form-control-file my-3">
   <button class="btn btn-primary">Submit</button>
 </form>
 {% endblock %}

@@ -1,0 +1,24 @@
+<div class="d-flex justify-content-end align-items-center mb-2">
+  <span class="font-weight-bold px-1">Display:</span>
+
+  {% set args = dict(request.args) %}
+  {% set _ = args.pop('view') if args.view %}
+
+  {% if session.view == 'list' %}
+    <span class="px-1">
+      List
+    </span>
+    |
+    <a class="px-1" href="{{url_for('index', view='grid', **args)}}">
+      Grid
+    </a>
+  {% else %}
+    <a class="px-1" href="{{url_for('index', view='list', **args)}}">
+      List
+    </a>
+    |
+    <span class="px-1">
+      Grid
+    </span>
+  {% endif %}
+</div>

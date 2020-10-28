@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{{book.title}}
+  {{book.title}}
 {% endblock %}
 
 {% block content %}
 <div class="row">
-  <div class="col-lg-3"><img class="img-fluid" src="{{book.cover_image}}"></div>
+  <div class="col-lg-3"><img class="img-fluid bg-dark" src="{{book.cover_image or url_for('static', filename='blank-cover.png')}}"></div>
   <div class="col-lg-9">
     <h2>{{book.title}}</h2>
     <table class="table">
       <tr>
         <td>Author(s)</td>
         <td>
-          <ul>
+          <ul class="flush-list">
             {% for author in book.authors %}
               <li><a href="{{url_for('index', author=author.id)}}"">{{author.name}}</a></li>
             {% endfor %}
@@ -22,7 +22,7 @@
       </tr>
       <tr>
         <td>Publisher</td>
-        <td><a href="{{url_for('index', publisher=publisher)}}"">{{book.publisher}}</a></td>
+        <td><a href="{{url_for('index', publisher=book.publisher)}}"">{{book.publisher}}</a></td>
       </tr>
       <tr>
         <td>Publication Year</td>
@@ -31,7 +31,7 @@
       <tr>
         <td>Tags</td>
         <td>
-          <ul>
+          <ul class="inline-comma-list">
             {% for tag in book.tags %}
               <li><a href="{{url_for('index', tag=tag.id)}}"">{{tag.tag_name}}</a></li>
             {% endfor %}

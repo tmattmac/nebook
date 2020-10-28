@@ -1,0 +1,17 @@
+<div class="bg-light rounded py-3 my-3 col">
+  <form id="book-search-form" class="w-100 d-flex align-items-stretch align-items-md-end flex-column flex-md-row">
+
+    <div class="form-group mb-3 my-md-0 mr-md-4 flex-grow-1">
+      <label for="book-search-input">Search Term</label>
+      {{form.q(class_='form-control', id_='book-search-input')}}
+    </div>
+
+    <div class="form-group mb-3 my-md-0 mr-md-4 flex-grow-1">
+      <label for="book-sort-input">Sort By</label>
+      {{form.sort(class_='form-control', id_='book-sort-input')}}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Search</button>
+
+  </form>
+</div>

@@ -9,15 +9,20 @@
   <p>You will need to authorize access to Google Drive to manage your ebooks.<p>
   <a href="{{url_for('gdrive_authorize')}}" id="gdrive_authorize" class="btn btn-primary">Authorize</a>
 {% else %}
+  <h2 class="text-center">Your Books</h2>
+  <div class="row">
+    {% include 'book/search-form.html' %}
+  </div>
   {% if books %}
-    {% if request.args.view == 'list' %}
+    {% include 'book/view-select.html' %}
+    {% if session.view == 'list' %}
       {% include 'book/list-table.html' %}
     {% else %}
       {% include 'book/list-grid.html' %}
     {% endif %}
   {% else %}
     <p class="text-center">There are currently no books in your library.</p>
-    <a class="btn btn-primary" href="/upload">Upload Book</a>
+    <a class="btn btn-primary text-center" href="/upload">Upload Book</a>
   {% endif %}
 {% endif %}
 {% endblock %}

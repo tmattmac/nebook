@@ -1,9 +1,9 @@
 {% from 'macros.html' import author_list, tag_list %}
 
-<table class="table">
+<table class="table table-hover">
   <thead>
     <tr>
-      {{column_header('title', 'Title')}}
+      <th scope="col">Title</th>
       <th scope="col">Authors</th>
       <th scope="col">Tags</th>
       <th scope="col">Read Link</th>
@@ -11,9 +11,9 @@
   </thead>
   <tbody>
     {% for book in books %}
-      <tr>
+      <tr data-book-id="{{book.gdrive_id}}">
         <td><a href="{{url_for('book_details', book_id=book.gdrive_id)}}">{{book.title}}</a></td>
-        <td>{{author_list(book.authors)}}</td>
+        <td>{{author_list(book.authors, with_links=true)}}</td>
         <td>{{tag_list(book.tags)}}</td>
         <td><a href="{{url_for('reader.reader_view', id=book.gdrive_id)}}">Read</a></td>
       </tr>

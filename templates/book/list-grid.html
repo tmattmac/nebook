@@ -1,0 +1,18 @@
+{% from 'macros.html' import author_list, tag_list %}
+
+<div class="row">
+  {% for book in books %}
+    <div class="col-md-4 col-lg-2 p-3">
+      <a href="{{url_for('book_details', book_id=book.gdrive_id)}}">
+        <div class="card bg-dark text-white border-0 shadow">
+          {% if book.cover_image %}
+            <img class="card-img" src="{{book.cover_image}}" alt="{{book.title}} cover">
+          {% else %}
+            <img class="card-img" src="{{url_for('static', filename='blank-cover.png')}}">
+          {% endif %}
+        </div>
+        <p class="book-card-title">{{book.title}}</p>
+      </a>
+    </div>
+  {% endfor %}
+</div>
