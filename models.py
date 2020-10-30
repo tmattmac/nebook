@@ -135,13 +135,15 @@ class UserBook(db.Model):
         secondary='books_authors',
         primaryjoin='UserBook.gdrive_id==BookAuthor.book_gdrive_id',
         secondaryjoin = 'BookAuthor.author_id==Author.id',
-        back_populates='books')
+        back_populates='books',
+        lazy='joined')
 
     tags = db.relationship('Tag',
         secondary='books_tags',
         primaryjoin='UserBook.gdrive_id==BookTag.book_gdrive_id',
         secondaryjoin='BookTag.tag_id==Tag.id',
-        back_populates='books')
+        back_populates='books',
+        lazy='joined')
 
 class Tag(db.Model):
 
