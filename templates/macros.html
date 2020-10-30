@@ -34,3 +34,27 @@
   {% endif %}
   <th scope="col"><a href="{{url_for('index', **args)}}">{{label}}</a></th>
 {% endmacro %}
+
+{% macro search_title(args) %}
+  {% if args.q %}
+    Results for '{{args.q}}'
+  {% else %}
+    Books
+  {% endif %}
+
+  {% if args.author %}
+    by {{args.author}}
+  {% endif %}
+
+  {% if args.publisher %}
+    from {{args.publisher}}
+  {% endif %}
+
+  {% if args.year %}
+    published in {{args.year}}
+  {% endif %}
+
+  {% if args.tag %}
+    with '{{args.tag}}' tag
+  {% endif %}
+{% endmacro %}

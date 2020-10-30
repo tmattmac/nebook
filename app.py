@@ -33,7 +33,7 @@ app.register_blueprint(ajax, url_prefix='/api')
 @app.route('/')
 @login_required
 def index():
-    books, count = build_query(**request.args)
+    books, search_meta = build_query(**request.args)
 
     form = BookSearchForm(
         csrf_enabled=False,
@@ -46,12 +46,12 @@ def index():
     #folderId = gdrive.get_app_folder_id(credentials)
     #files = gdrive.get_all_epub_file_ids(credentials)
 
-    # Test epub opening
-    # from lib.epubtag import EpubBook
-    # file = gdrive.download_file(credentials, files[0])
-    # epub = EpubBook(file)
-
-    return render_template('index.html', books=books, books_count=count, form=form)
+    return render_template(
+        'index.html',
+        books=books,
+        search_meta=search_meta,
+        form=form
+    )
 
 @app.route('/book/<book_id>')
 @login_required

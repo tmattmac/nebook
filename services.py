@@ -31,21 +31,33 @@ def build_query(**kwargs):
     publisher = kwargs.get('publisher')
     year = kwargs.get('year')
 
+    search_meta = {}
+
     query = db.session.query(UserBook)\
         .filter(UserBook.user_id == current_user.id)\
         .outerjoin(UserBook.authors)\
         .outerjoin(UserBook.tags)
 
     if author:
-        query = query.filter(Author.id == author)
+        # TODO: Try-except block
+        author_name = Author.query.get(author).name
+        if author_name:
+            search_meta['author'] = author_name
+            query = query.filter(Author.id == author)
     if tag:
-        query = query.filter(Tag.id == tag)
+        tag_name = Tag.query.get(tag).tag_name
+        if tag_name:
+            search_meta['tag'] = tag_name
+            query = query.filter(Tag.id == tag)
     if publisher:
+        search_meta['publisher'] = publisher
         query = query.filter(UserBook.publisher.ilike(f'%{publisher}%'))
     if year:
+        search_meta['year'] = year
         query = query.filter(UserBook.publication_year == year)
 
     if q:
+        search_meta['q'] = q
         q = f'%{q}%'
         query = query.filter(or_(
             UserBook.title.ilike(q),
@@ -60,18 +72,22 @@ def build_query(**kwargs):
     elif sort == 'author':
         sort = Author.name
 
+    if sort == 'last_read':
+        order = order or 'desc'
+
     if order == 'desc':
         query = query.order_by(desc(sort).nullslast())
     else:
         query = query.order_by(nullslast(sort))
 
     count = query.count()
+    search_meta['count'] = count
 
     query = query\
             .limit(per_pg)\
             .offset(pg * per_pg)
 
-    return query.all(), count
+    return query.all(), search_meta
 
 def serialize_book(book):
     return {

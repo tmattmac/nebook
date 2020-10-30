@@ -9920,4 +9920,33 @@ h3 {
   content: "";
 }
 
+.cover-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-image-container:after {
+  content: "";
+  display: block;
+  padding-top: 150%;
+}
+
+.cover-image-container img {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.cover-image-container p {
+  width: auto;
+  width: 100%;
+  max-width: none;
+  position: absolute;
+  padding: 1em 0.5em;
+}
+
 /*# sourceMappingURL=styles.css.map */

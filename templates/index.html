@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
-{% from 'macros.html' import author_list, tag_list, column_header %}
+{% from 'macros.html' import author_list, tag_list, column_header, search_title %}
 
-{% block title %}Hello World!{% endblock %}
+{% set page_title = search_title(search_meta) %}
+
+{% block title %}UBP | {{page_title}}{% endblock %}
 
 {% block content %}
 {% if not current_user.gdrive_permission_granted %}
   <p>You will need to authorize access to Google Drive to manage your ebooks.<p>
   <a href="{{url_for('gdrive_authorize')}}" id="gdrive_authorize" class="btn btn-primary">Authorize</a>
 {% else %}
-  <h2 class="text-center">Your Books</h2>
+  <h2 class="text-center">{{page_title}}</h2>
   <div class="row">
     {% include 'book/search-form.html' %}
   </div>

@@ -25,4 +25,4 @@ def reader_view(book_id):
     except:
         pass
 
-    return render_template('reader.html')
+    return render_template('reader.html', book=book)
