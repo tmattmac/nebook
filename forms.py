@@ -60,5 +60,6 @@ class BookSearchForm(FlaskForm):
         ('last_read', 'Last Read'),
         ('title', 'Title'),
         ('publisher', 'Publisher'),
-        ('publication_year', 'Year')
+        ('publication_year', 'Year'),
+        ('author', 'Author')
     ])

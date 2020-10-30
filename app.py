@@ -4,7 +4,7 @@ from models import *
 import os
 from sync import book_model_from_api_data
 from forms import EditBookDetailForm, BookSearchForm
-
+from helpers import build_query, update_book_with_form_data
 import gdrive
 import gbooks
 
@@ -22,18 +22,18 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 connect_db(app)
 
+# Routes in external files
 import auth
 import gauth
-
 from reader import reader
-from services import ajax, build_query
+from api import ajax
 app.register_blueprint(reader, url_prefix='/reader')
 app.register_blueprint(ajax, url_prefix='/api')
 
 @app.route('/')
 @login_required
 def index():
-    books, search_meta = build_query(**request.args)
+    books, search_meta = build_query(current_user, **request.args)
 
     form = BookSearchForm(
         csrf_enabled=False,
@@ -78,27 +78,6 @@ def edit_book_details(book_id):
 
     return render_template('book/edit_details.html', book=book, form=form)
 
-def update_book_with_form_data(book_instance, form):
-    book = {
-        'title':            form.title.data,
-        'publisher':        form.publisher.data,
-        'publication_year': form.publication_year.data,
-        'comments':         form.comments.data,
-        'authors':          [],
-        'tags':             []
-    }
-    for author_name in form.authors.data:
-        author = get_or_create(Author, name=author_name, user_id=current_user.id)
-        book['authors'].append(author)
-    for tag_name in form.tags.data:
-        tag = get_or_create(Tag, tag_name=tag_name, user_id=current_user.id)
-        book['tags'].append(tag)
-
-    for k, v in book.items():
-        setattr(book_instance, k, v)
-
-    db.session.add(book_instance)
-    db.session.commit()
 
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required

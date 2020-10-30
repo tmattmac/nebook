@@ -8,6 +8,19 @@ import google_auth_oauthlib.flow
 import google.auth.transport.requests
 import json
 
+# Load client secrets from file
+with open('client_secret.json') as f:
+    data = json.load(f)
+
+# Google Drive API authorization information 
+CLIENT_ID =     data['web']['client_id']
+CLIENT_SECRET = data['web']['client_secret']
+TOKEN_URI =     data['web']['token_uri']
+GDRIVE_SCOPES = [
+    'https://www.googleapis.com/auth/drive.metadata.readonly',
+    'https://www.googleapis.com/auth/drive.file'
+]
+
 @app.route('/gdrive-authorize')
 @login_required
 def gdrive_authorize():
@@ -70,23 +83,3 @@ def create_credentials(user, access_token=None):
         request = google.auth.transport.requests.Request()
         credentials.refresh(request)
     return credentials
-
-
-def get_client_secrets():
-
-    with open('client_secret.json') as f:
-        data = json.load(f)
-    
-    client_id = data['web']['client_id']
-    client_secret = data['web']['client_secret']
-    token_uri = data['web']['token_uri']
-
-    return client_id, client_secret, token_uri
-
-
-# Google Drive API authorization information
-GDRIVE_SCOPES = [
-    'https://www.googleapis.com/auth/drive.metadata.readonly',
-    'https://www.googleapis.com/auth/drive.file'
-]
-CLIENT_ID, CLIENT_SECRET, TOKEN_URI = get_client_secrets()
