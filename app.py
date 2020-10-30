@@ -1,13 +1,10 @@
-from flask import Flask, flash, request, redirect, render_template, session, url_for
+from flask import Flask, flash, request, redirect, render_template, session, url_for, send_file
 from flask_login import LoginManager, login_required, current_user
 from models import *
 import os
 from sync import book_model_from_api_data
 from forms import EditBookDetailForm, BookSearchForm
 
-# TODO: Refactor Gdrive functions to new file
-import google.oauth2.credentials
-import google_auth_oauthlib.flow
 import gdrive
 import gbooks
 
@@ -24,9 +21,9 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 connect_db(app)
-db.create_all()
 
 import auth
+import gauth
 
 from reader import reader
 from services import ajax, build_query
@@ -36,13 +33,6 @@ app.register_blueprint(ajax, url_prefix='/api')
 @app.route('/')
 @login_required
 def index():
-    if 'credentials' not in session:
-        return redirect(url_for('gdrive_authorize'))
-
-    # Load credentials from the session.
-    credentials = google.oauth2.credentials.Credentials(
-        **session['credentials'])
-
     books, count = build_query(**request.args)
 
     form = BookSearchForm(
@@ -113,14 +103,17 @@ def update_book_with_form_data(book_instance, form):
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload_ebook_file():
-    if 'credentials' not in session:
-        return redirect(url_for('gdrive_authorize'))
-
-    credentials = google.oauth2.credentials.Credentials(
-        **session['credentials'])
-
+    
+    if not current_user.gdrive_permission_granted:
+        return redirect(url_for('index'))
+        
     if request.method == 'GET':
         return render_template('book/upload.html')
+
+    credentials = gauth.create_credentials(
+        user=current_user,
+        access_token=session.get('access_token')
+    )
 
     file = request.files['file']
 
@@ -134,14 +127,14 @@ def upload_ebook_file():
             author = authors[0]
     except RuntimeError:
         flash('Not a valid ebook file', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('upload_ebook_file'))
 
     book_info = gbooks.get_book_by_title_author(title, author)
 
     #--------------DISABLED FOR DEVELOPMENT------------------------------------
-    # book_gdrive_id = gdrive.generate_file_id(credentials)
-    # gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
-    book_gdrive_id = str(current_user.id) + book_info.get('id')
+    book_gdrive_id = gdrive.generate_file_id(credentials)
+    gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
+    # book_gdrive_id = str(current_user.id) + book_info.get('id')
     #--------------------------------------------------------------------------
 
     book = book_model_from_api_data(current_user.id, book_info)
@@ -150,65 +143,3 @@ def upload_ebook_file():
     db.session.commit()
 
     return redirect(url_for('edit_book_details', book_id=book.gdrive_id))
-
-@app.route('/gdrive-authorize')
-@login_required
-def gdrive_authorize():
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        'client_secret.json',
-        scopes=[
-            'https://www.googleapis.com/auth/drive.metadata.readonly',
-            'https://www.googleapis.com/auth/drive.file'
-        ]
-    )
-
-    flow.redirect_uri = url_for('gdrive_callback', _external=True)  # TODO: Change this
-    
-    auth_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true'
-    )
-
-    session['state'] = state
-
-    return redirect(auth_url)
-
-@app.route('/gdrive-authorize-callback')
-def gdrive_callback():
-
-    # TODO: Confirm request url is from Google oauth page, redirect if not
-    state = session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        'client_secret.json',
-        scopes=[
-            'https://www.googleapis.com/auth/drive.metadata.readonly',
-            'https://www.googleapis.com/auth/drive.file'
-        ],
-        state=state
-    )
-
-    flow.redirect_uri = url_for('gdrive_callback', _external=True)
-
-    authorization_response = request.url
-    flow.fetch_token(authorization_response=authorization_response)
-
-    credentials = flow.credentials
-    session['credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
-    }
-
-    # Store refresh token in database
-    current_user.gdrive_permission_granted = True
-    current_user.gdrive_refresh_token = credentials.refresh_token
-    db.session.add(current_user)
-    try:
-        db.session.commit()
-    except:
-        # TODO: Handle database errors
-        pass
-    return redirect(url_for('index'))

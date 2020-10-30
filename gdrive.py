@@ -102,6 +102,7 @@ def download_file(credentials, file_id):
     while done is False:
         status, done = downloader.next_chunk()
 
+    file_handle.seek(0)
     return file_handle
 
 def upload_file(credentials, file_handle, filename, app_folder_id, generated_file_id):
@@ -141,3 +142,7 @@ def generate_file_id(credentials):
         return resp['ids'][0]
     except errors.HttpError as error:
         return None
+
+def delete_file(file_id):
+
+    return

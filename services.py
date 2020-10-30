@@ -1,8 +1,10 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, session, send_file
 from flask_login import current_user, login_required
 from sqlalchemy import or_, desc, func
 from app import app
 from models import *
+import gdrive
+import gauth
 
 ajax = Blueprint('ajax', __name__)
 
@@ -137,3 +139,23 @@ def get_user_authors():
             'name': author.name
         } for author in authors]
     })
+
+@ajax.route('/book/file/<book_id>.epub')
+@login_required
+def get_book_file(book_id):
+
+    # Make sure book exists
+    book = UserBook.query.get_or_404({
+        'user_id': current_user.id,
+        'gdrive_id': book_id
+    })
+
+    credentials = gauth.create_credentials(
+        user=current_user,
+        access_token=session.get('access_token')
+    )
+    
+    file = gdrive.download_file(credentials, book_id)
+
+    # TODO: Find way to invalidate cache if user deletes file
+    return send_file(file, mimetype='application/epub+zip', cache_timeout=7*24*60*60)
