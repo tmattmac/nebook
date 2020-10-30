@@ -15,7 +15,7 @@
         <td><a href="{{url_for('book_details', book_id=book.gdrive_id)}}">{{book.title}}</a></td>
         <td>{{author_list(book.authors, with_links=true)}}</td>
         <td>{{tag_list(book.tags)}}</td>
-        <td><a href="{{url_for('reader.reader_view', id=book.gdrive_id)}}">Read</a></td>
+        <td><a href="{{url_for('reader.reader_view', book_id=book.gdrive_id)}}" target="_blank" rel="noopener noreferrer">Read</a></td>
       </tr>
     {% endfor %}
   </tbody>

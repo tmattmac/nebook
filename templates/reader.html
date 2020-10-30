@@ -19,11 +19,18 @@
         <script>
             "use strict";
 
+            let baseUrl = location.protocol + '//' + location.host;
+            let apiPath = '/api/book';
+            let apiUrl = baseUrl + apiPath;
+            let path = location.pathname.split('/');
+            let id = path[path.length-1];
+            
             document.onreadystatechange = function () {
               if (document.readyState == "complete") {
-                window.reader = ePubReader("https://s3.amazonaws.com/moby-dick/", {
-                   restore: true
-                 });
+                let epubFile = `${apiUrl}/file/${id}.epub`;
+                window.reader = ePubReader(epubFile, {
+                  restore: true,
+                });
               }
             };
 
@@ -99,7 +106,7 @@
         <div id="viewer"></div>
         <div id="next" class="arrow">›</div>
 
-        <div id="loader"><img src="img/loader.gif"></div>
+        <div id="loader"><img src="{{ url_for('reader.static', filename='img/loader.gif') }}"></div>
       </div>
       <div class="modal md-effect-1" id="settings-modal">
           <div class="md-content">
