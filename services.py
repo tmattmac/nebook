@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint, session, send_file
 from flask_login import current_user, login_required
-from sqlalchemy import or_, desc, func
+from sqlalchemy import or_, desc, func, nullslast
 from app import app
 from models import *
 import gdrive
@@ -61,9 +61,9 @@ def build_query(**kwargs):
         sort = Author.name
 
     if order == 'desc':
-        query = query.order_by(desc(sort))
+        query = query.order_by(desc(sort).nullslast())
     else:
-        query = query.order_by(sort)
+        query = query.order_by(nullslast(sort))
 
     count = query.count()
 
@@ -139,6 +139,29 @@ def get_user_authors():
             'name': author.name
         } for author in authors]
     })
+
+@ajax.route('/book/<book_id>/progress', methods=['GET', 'POST'])
+@login_required
+def book_progress(book_id):
+
+    book = UserBook.query.get_or_404({
+        'user_id': current_user.id,
+        'gdrive_id': book_id
+    })
+
+    if request.method == 'POST':
+        try:
+            progress = request.json.get('progress', book.progress_percentage)
+            book.progress_percentage = float(progress)
+            db.session.add(book)
+            db.session.commit()
+        except:
+            return jsonify({'error': 'Could not update progress'})
+
+    return jsonify({
+        'progress': book.progress_percentage
+    })
+    
 
 @ajax.route('/book/file/<book_id>.epub')
 @login_required

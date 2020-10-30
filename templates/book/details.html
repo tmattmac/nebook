@@ -44,7 +44,7 @@
       </tr>
       <tr>
         <td>Last Read</td>
-        <td>{{book.last_read if book.last_read is not none else 'Never'}}</td>
+        <td>{{book.last_read.strftime('%Y-%m-%d') if book.last_read is not none else 'Never'}}</td>
       </tr>
 
     </table>
