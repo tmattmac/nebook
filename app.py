@@ -135,3 +135,36 @@ def upload_ebook_file():
     db.session.commit()
 
     return redirect(url_for('edit_book_details', book_id=book.gdrive_id))
+
+@app.route('/book/<book_id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_book(book_id):
+    book = UserBook.query.get_or_404({
+        'user_id': current_user.id,
+        'gdrive_id': book_id
+    })
+    
+    if request.method == 'GET':
+        return render_template('book/delete-confirm.html', book=book)
+
+    credentials = gauth.create_credentials(
+        user=current_user,
+        access_token=session.get('access_token')
+    )
+
+    gdrive_id = book.gdrive_id
+    try:
+        db.session.delete(book)
+        db.session.commit()
+    except:
+        db.session.rollback()
+    
+    gdrive.delete_file(credentials, gdrive_id)
+    # try:
+    #     gdrive.delete_file(credentials, gdrive_id)
+    # except:
+    #     pass
+    #     # TODO: Handle error
+
+    flash('File successfully deleted', 'success')
+    return redirect(url_for('index'))

@@ -143,6 +143,13 @@ def generate_file_id(credentials):
     except errors.HttpError as error:
         return None
 
-def delete_file(file_id):
+def delete_file(credentials, file_id):
 
-    return
+    drive = build_gdrive_service(credentials)
+    resp = drive.files().delete(fileId=file_id).execute()
+    
+    # try:
+    #     resp = drive.files().delete(file_id).execute()
+    #     return True
+    # except errors.HttpError as error:
+    #     return False

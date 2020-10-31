@@ -45,10 +45,24 @@
     transform: translateX(-50%);
 }
 
-.cover-image-container p {
-    width: auto;
+.cover-image-container .book-cover-text {
     width: 100%;
-    max-width: none;
+    height: 100%;
     position: absolute;
+    overflow: none;
     padding: 1em 0.5em;
+}
+
+.cover-image-container .read-link {
+    display: none;
+    position: absolute;
+    top: 0.25em;
+    right: 0.25em;
+    padding: 0.5em;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.cover-image-container:hover .read-link {
+    display: block;
+    font-weight: bold;
 }

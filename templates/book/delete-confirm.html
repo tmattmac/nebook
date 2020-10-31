@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  UBP | Confirm deletion of {{book.title}}
+{% endblock %}
+
+{% block content %}
+  <p>Are you sure you want to delete <span class="font-weight-bold">{{book.title}}</span>?</p>
+  <form method="POST">
+    <button type="submit" class="btn btn-danger mr-2">Confirm</button>
+    <a href="{{url_for('book_details', book_id=book.gdrive_id)}}" class="btn btn-secondary">Back</a>
+  </form>
+{% endblock %}
