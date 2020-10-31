@@ -1,5 +1,6 @@
-from sqlalchemy import or_, desc, func, nullslast
+from sqlalchemy import or_, and_, desc, func, nullslast, text
 from models import *
+from lib.epubtag import EpubBook
 
 def build_query(user, **kwargs):
     """
@@ -11,7 +12,13 @@ def build_query(user, **kwargs):
     sort    name of column to sort by (default: last_read)
     order   asc or desc (default: )
     """
-    SORT_FIELDS = ['title', 'publisher', 'publication_year', 'last_read', 'author']
+    SORT_FIELDS = {
+        'title': UserBook.title,
+        'publisher': UserBook.publisher,
+        'publication_year': UserBook.publication_year,
+        'last_read': UserBook.last_read,
+        'author': Author.name
+    }
 
     # TODO: Get items per page from user preferences
     pg = kwargs.get('pg', 1) - 1
@@ -68,6 +75,8 @@ def build_query(user, **kwargs):
     if sort == 'last_read':
         order = order or 'desc'
 
+    sort = SORT_FIELDS[sort]
+
     if order == 'desc':
         query = query.order_by(desc(sort).nullslast())
     else:
@@ -93,10 +102,10 @@ def update_book_with_form_data(book_instance, form):
         'tags':             []
     }
     for author_name in form.authors.data:
-        author = get_or_create(Author, name=author_name, user_id=user.id)
+        author = get_or_create(Author, name=author_name, user_id=book_instance.user_id)
         book['authors'].append(author)
     for tag_name in form.tags.data:
-        tag = get_or_create(Tag, tag_name=tag_name, user_id=user.id)
+        tag = get_or_create(Tag, tag_name=tag_name, user_id=book_instance.user_id)
         book['tags'].append(tag)
 
     for k, v in book.items():
@@ -104,3 +113,61 @@ def update_book_with_form_data(book_instance, form):
 
     db.session.add(book_instance)
     db.session.commit()
+
+
+def parse_year(date_string):
+    try:
+        return [part for part in date_string.split('-') if len(part) == 4][0]
+    except:
+        return None
+
+
+def book_model_from_api_data(user_id, api_data):
+
+    metadata = api_data['volumeInfo']
+    thumbnails = metadata.get('imageLinks')
+    cover_image = None
+    if thumbnails:
+        cover_image = thumbnails.get('thumbnail')
+    book = UserBook(
+        user_id=user_id,
+        gbooks_id=api_data['id'],
+        title=metadata.get('title'),
+        publisher=metadata.get('publisher'),
+        publication_year=parse_year(metadata.get('publishedDate')),
+        cover_image=cover_image
+    )
+
+    author_names = metadata.get('authors', [])
+    book.authors = authors_from_author_list(author_names, user_id)
+
+    return book
+
+def authors_from_author_list(author_names, user_id):
+    # Create any authors not already in database
+    authors = Author.query.filter(
+        and_(
+            Author.name.in_(author_names),
+            Author.user_id == user_id
+        )
+    ).all()
+    author_names = set(author_names) - set([author.name for author in authors])
+    for name in author_names:
+        authors.append(Author(name=name, user_id=user_id))
+
+    return authors
+
+def extract_metadata_from_epub(file_handle):
+    metadata = {}
+    epub = EpubBook(file_handle)
+    metadata['title'] = epub.get_title()
+    metadata['authors'] = epub.get_authors()
+    publisher, _, _ = epub.get_matches('dc:publisher')
+    date, _, _ = epub.get_matches('dc:date')
+
+    if publisher:
+        metadata['publisher'] = publisher[0]
+    if date:
+        metadata['publication_year'] = parse_year(date[0])
+
+    return metadata

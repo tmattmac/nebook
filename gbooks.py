@@ -14,5 +14,5 @@ def get_book_by_title_author(title, author):
         q=f"intitle:'{title}' inauthor:'{author}'"
     ).execute()
 
-    if len(results['items']) > 0:
+    if results['totalItems'] > 0:
         return results['items'][0]

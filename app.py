@@ -2,9 +2,8 @@ from flask import Flask, flash, request, redirect, render_template, session, url
 from flask_login import LoginManager, login_required, current_user
 from models import *
 import os
-from sync import book_model_from_api_data
 from forms import EditBookDetailForm, BookSearchForm
-from helpers import build_query, update_book_with_form_data
+from helpers import *
 import gdrive
 import gbooks
 
@@ -30,14 +29,15 @@ from api import ajax
 app.register_blueprint(reader, url_prefix='/reader')
 app.register_blueprint(ajax, url_prefix='/api')
 
+
 @app.route('/')
 @login_required
 def index():
     books, search_meta = build_query(current_user, **request.args)
 
     form = BookSearchForm(
-        csrf_enabled=False,
-        data=request.args
+        data=request.args,
+        meta={'csrf': False}
     )
 
     session['view'] = request.args.get('view') or session.get('view', 'grid')
@@ -95,29 +95,42 @@ def upload_ebook_file():
     )
 
     file = request.files['file']
-
-    from lib.epubtag import EpubBook
-    epub = EpubBook(file)
     try:
-        title = epub.get_title()
-        authors = epub.get_authors()
-        author = ''
-        if len(authors) > 0:
-            author = authors[0]
+        metadata = extract_metadata_from_epub(file)
     except RuntimeError:
         flash('Not a valid ebook file', 'danger')
         return redirect(url_for('upload_ebook_file'))
 
-    book_info = gbooks.get_book_by_title_author(title, author)
+    book_api_data = gbooks.get_book_by_title_author(
+        metadata['title'], metadata['authors'][0]
+    )
 
     #--------------DISABLED FOR DEVELOPMENT------------------------------------
     book_gdrive_id = gdrive.generate_file_id(credentials)
-    gdrive.upload_file(credentials, file, f'{title} - {author}', gdrive.get_app_folder_id(credentials), book_gdrive_id)
     # book_gdrive_id = str(current_user.id) + book_info.get('id')
     #--------------------------------------------------------------------------
 
-    book = book_model_from_api_data(current_user.id, book_info)
+    if book_api_data:
+        book = book_model_from_api_data(current_user.id, book_api_data)
+    else:
+        book = UserBook(
+            user_id =   current_user.id,
+            title =     metadata['title'],
+            authors =   authors_from_author_list(
+                metadata['authors'],
+                current_user.id
+            ),
+            publisher = metadata.get('publisher'),
+            publication_year = metadata.get('publication_year')
+        )
     book.gdrive_id = book_gdrive_id
+    gdrive.upload_file(
+        credentials,
+        file,
+        f'{book.title} - {book.authors[0]}',
+        gdrive.get_app_folder_id(credentials),
+        book_gdrive_id
+    )
     db.session.add(book)
     db.session.commit()
 
