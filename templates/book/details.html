@@ -7,9 +7,13 @@
 {% block content %}
 <div class="row">
   <div class="col-12 mb-2">
-    <h2 class="text-center">{{book.title}}</h2>
+    <h2 class="text-center">Details for {{book.title}}</h2>
   </div>
-  <div class="col-lg-2"><img class="img-fluid bg-dark" src="{{book.cover_image or url_for('static', filename='blank-cover.png')}}"></div>
+  <div class="col-lg-2">
+    {% if book.cover_image %}
+      <img class="img-fluid bg-dark w-100" src="{{book.cover_image}}">
+    {% endif %}
+  </div>
   <div class="col-lg-10">
     <table class="table">
       <tr>
