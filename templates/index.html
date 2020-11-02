@@ -2,7 +2,9 @@
 
 {% from 'macros.html' import author_list, tag_list, column_header, search_title %}
 
-{% set page_title = search_title(search_meta) %}
+{% set result_count = search_meta.pop('count') %}
+{% set page_title = 'Search Results' if search_meta else 'Your Books' %}
+
 
 {% block title %}UBP | {{page_title}}{% endblock %}
 
@@ -22,9 +24,15 @@
     {% else %}
       {% include 'book/list-grid.html' %}
     {% endif %}
+  {% elif search_meta %}
+    <div class="w-100 text-center">
+      <p>Your search yielded no results.</p>
+    </div>
   {% else %}
-    <p class="text-center">There are currently no books in your library.</p>
-    <a class="btn btn-primary text-center" href="/upload">Upload Book</a>
+    <div class="w-100 text-center">
+      <p>There are currently no books in your library.</p>
+      <a class="btn btn-primary" href="/upload">Upload Book</a>
+    </div>
   {% endif %}
 {% endif %}
 {% endblock %}

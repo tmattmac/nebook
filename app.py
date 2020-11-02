@@ -33,12 +33,16 @@ app.register_blueprint(ajax, url_prefix='/api')
 @app.route('/')
 @login_required
 def index():
-    books, search_meta = build_query(current_user, **request.args)
 
     form = BookSearchForm(
-        data=request.args,
+        formdata=request.args,
         meta={'csrf': False}
     )
+
+    books, search_meta = build_query(current_user, **form.data)
+
+    form.author.choices = [(a.id, a.name) for a in get_authors(current_user.id)]
+    form.tag.choices = [(t.id, t.tag_name) for t in get_tags(current_user.id)]
 
     session['view'] = request.args.get('view') or session.get('view', 'grid')
 

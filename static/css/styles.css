@@ -9932,13 +9932,12 @@ h3 {
 }
 
 .cover-image-container img {
-  width: auto;
-  height: 100%;
-  max-width: none;
+  width: 100%;
+  object-fit: cover;
   position: absolute;
   left: 50%;
-  top: 0;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .cover-image-container .book-cover-text {
@@ -9961,6 +9960,31 @@ h3 {
 .cover-image-container:hover .read-link {
   display: block;
   font-weight: bold;
+}
+
+.search-toggle-container {
+  position: relative;
+}
+
+.search-toggle {
+  background-color: white;
+  padding: 0.5em;
+  position: relative;
+  line-height: 0.8em;
+  top: -60%;
+}
+
+.search-toggle[aria-expanded=true]:after {
+  content: "▴";
+}
+
+.search-toggle[aria-expanded=false]:after {
+  content: "▾";
+}
+
+.flex-break {
+  width: 0;
+  flex-basis: 100%;
 }
 
 /*# sourceMappingURL=styles.css.map */

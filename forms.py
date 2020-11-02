@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, IntegerField, TextAreaField, SelectField, HiddenField
+from wtforms import StringField, PasswordField, IntegerField, TextAreaField, SelectField, HiddenField, SelectMultipleField
 from lib.wtf_taglist import TagListField
 from wtforms.validators import Length, DataRequired, Email, NumberRange
 from datetime import datetime
@@ -51,6 +51,8 @@ class EditBookDetailForm(FlaskForm):
 
     comments = TextAreaField('Comments')
 
+    cover_image = StringField('Cover Image URL')
+
     tags = TagListField('Tags', separator=',')
 
 class BookSearchForm(FlaskForm):
@@ -63,3 +65,6 @@ class BookSearchForm(FlaskForm):
         ('publication_year', 'Year'),
         ('author', 'Author')
     ])
+
+    author = SelectMultipleField('Author(s)', coerce=int)
+    tag = SelectMultipleField('Tag(s)', coerce=int)

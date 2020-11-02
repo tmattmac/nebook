@@ -6,7 +6,7 @@ UBP | Edit details for {{book.title}}
 
 {% block content %}
 
-<h2 class="text-center">Edit details for {{book.title}}</h2>
+<h2>Edit details for {{book.title}}</h2>
 
 <form method="POST">
 {{ form.hidden_tag() }}
@@ -18,9 +18,7 @@ UBP | Edit details for {{book.title}}
     </div>
   {% endif %}
 {% endfor %}
-  <div class="d-flex">
-    <button type="submit" class="btn btn-primary ml-auto">Save</button>
-    <a class="btn btn-secondary ml-2" href="{{url_for('book_details', book_id=book.gdrive_id)}}">Cancel</a>
-  </div>
+  <button type="submit" class="btn btn-primary">Save</button>
+  <a class="btn btn-light" href="{{url_for('book_details', book_id=book.gdrive_id)}}">Cancel</a>
 </form>
 {% endblock %}

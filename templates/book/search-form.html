@@ -1,18 +1,34 @@
-<div class="bg-light rounded py-3 my-3 col">
-  <form id="book-search-form" class="w-100 d-flex align-items-stretch align-items-md-end flex-column flex-md-row">
+<div class="search-toggle-container mt-3 w-100 text-center border-top border-muted">
+  <a class="search-toggle text-muted" data-toggle="collapse" href="#book-search-form-container" role="button" aria-expanded="{{'true' if search_meta else 'false'}}" aria-controls="book-search-form-container">Search</a>
+</div>
 
-    <div class="form-group mb-3 my-md-0 mr-md-4 flex-grow-1">
-      <label for="book-search-input">Search Term</label>
-      {{form.q(class_='form-control', id_='book-search-input')}}
+<div class="bg-light rounded col collapse {{'show' if search_meta else ''}}" id="book-search-form-container">
+  <form id="book-search-form" class="w-100">
+    <div class="d-flex align-items-stretch align-items-md-end flex-column flex-wrap flex-md-row my-3">
+      <div class="form-group mb-3 mr-md-4 flex-grow-1">
+        <label for="book-search-input">Search Term</label>
+        {{form.q(class_='form-control', id_='book-search-input')}}
+      </div>
+
+      <div class="form-group mb-3 mr-md-4 flex-grow-1">
+        <label for="book-sort-input">Sort By</label>
+        {{form.sort(class_='form-control', id_='book-sort-input')}}
+      </div>
+
+      <button type="submit" class="btn btn-primary mb-3 mr-md-2 order-1 order-md-0">Search</button>
+
+      <a href="/" class="btn btn-secondary mb-3 order-2 order-md-0">Clear</a>
+
+      <div class="flex-break"></div>
+
+      <div class="form-group mb-3 mr-md-4 flex-grow-1">
+        <label for="book-author-filter">Author(s)</label>
+        {{form.author(class_='form-control', id_='book-author-filter')}}
+      </div>
+      <div class="form-group mb-3 flex-grow-1">
+        <label for="book-tag-filter">Tag(s)</label>
+        {{form.tag(class_='form-control', id_='book-tag-filter')}}
+      </div>
     </div>
-
-    <div class="form-group mb-3 my-md-0 mr-md-4 flex-grow-1">
-      <label for="book-sort-input">Sort By</label>
-      {{form.sort(class_='form-control', id_='book-sort-input')}}
-    </div>
-
-    <button type="submit" class="btn btn-primary mb-3 my-md-0 mr-md-2">Search</button>
-
-    <a href="/" class="btn btn-secondary">Clear</a>
   </form>
 </div>

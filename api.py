@@ -4,7 +4,7 @@ from app import app
 from models import *
 import gdrive
 import gauth
-from helpers import build_query
+from helpers import build_query, get_authors, get_tags
 
 ajax = Blueprint('ajax', __name__)
 
@@ -31,10 +31,7 @@ def get_single_book(book_id):
 @ajax.route('/tags')
 @login_required
 def get_user_tags():
-    tags = db.session.query(Tag)\
-        .filter(Tag.user_id==current_user.id)\
-        .join(Tag.books)\
-        .all()
+    tags = get_authors(current_user.id)
     return jsonify({
         'tags': [{
             'id': tag.id,
@@ -45,10 +42,7 @@ def get_user_tags():
 @ajax.route('/authors')
 @login_required
 def get_user_authors():
-    authors = db.session.query(Author)\
-        .filter(Author.user_id==current_user.id)\
-        .join(Author.books)\
-        .all()
+    authors = get_authors(current_user.id)
     return jsonify({
         'authors': [{
             'id': author.id,
