@@ -36,25 +36,14 @@
 {% endmacro %}
 
 {% macro search_title(args) %}
-  {% if args.q %}
-    Results for '{{args.q}}'
-  {% else %}
-    Books
-  {% endif %}
-
+  Your Books
   {% if args.author %}
     by {{args.author}}
-  {% endif %}
-
-  {% if args.publisher %}
+  {% elif args.publisher %}
     from {{args.publisher}}
-  {% endif %}
-
-  {% if args.year %}
+  {% elif args.year %}
     published in {{args.year}}
-  {% endif %}
-
-  {% if args.tag %}
+  {% elif args.tag %}
     with '{{args.tag}}' tag
   {% endif %}
 {% endmacro %}

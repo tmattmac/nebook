@@ -1,6 +1,5 @@
 from googleapiclient.discovery import build
 from googleapiclient import errors
-import io
 
 GDRIVE_APP_FOLDER = 'UBP Ebooks'
 API_NAME = 'books'

@@ -3,6 +3,16 @@ from models import *
 from lib.epubtag import EpubBook
 from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
+SORT_FIELDS = {
+        'title': UserBook.title,
+        'publisher': UserBook.publisher,
+        'publication_year': UserBook.publication_year,
+        'last_read': UserBook.last_read,
+        'author': Author.name
+    }
+
+DEFAULT_PER_PAGE = 1
+
 def build_query(user, **kwargs):
     """
     Build a query on books based on provided query parameters
@@ -13,17 +23,10 @@ def build_query(user, **kwargs):
     sort    name of column to sort by (default: last_read)
     order   asc or desc (default: )
     """
-    SORT_FIELDS = {
-        'title': UserBook.title,
-        'publisher': UserBook.publisher,
-        'publication_year': UserBook.publication_year,
-        'last_read': UserBook.last_read,
-        'author': Author.name
-    }
 
     # TODO: Get items per page from user preferences
-    pg = kwargs.get('pg', 1) - 1
-    per_pg = kwargs.get('per_pg', 20)
+    pg = kwargs.get('pg', 1)
+    per_pg = kwargs.get('per_pg', DEFAULT_PER_PAGE)
     sort = kwargs.get('sort')
     order = kwargs.get('order')
     author = kwargs.get('author')
@@ -34,21 +37,19 @@ def build_query(user, **kwargs):
 
     search_meta = {}
 
-    query = db.session.query(UserBook)\
-        .filter(UserBook.user_id == user.id)\
-        .outerjoin(UserBook.authors)\
-        .outerjoin(UserBook.tags)
+    query = UserBook.query\
+        .filter(UserBook.user_id == user.id)
 
     if author:
         # TODO: Try-except block
-        query = query.filter(Author.id.in_(author))
+        query = query.filter(UserBook.authors.any(Author.id.in_(author)))
         if len(author) == 1:
             search_meta['author'] = Author.query.get(author[0]).name
         else:
             search_meta['author'] = '(multiple authors)'
             
     if tag:
-        query = query.filter(Tag.id.in_(tag))
+        query = query.filter(UserBook.tags.any(Tag.id.in_(tag)))
         if len(tag) == 1:
             search_meta['tag'] = Tag.query.get(tag[0]).tag_name
         else:
@@ -88,14 +89,11 @@ def build_query(user, **kwargs):
     else:
         query = query.order_by(nullslast(sort))
 
-    count = query.count()
-    search_meta['count'] = count
+    # query = query\
+    #         .limit(per_pg)\
+    #         .offset(pg * per_pg)
 
-    query = query\
-            .limit(per_pg)\
-            .offset(pg * per_pg)
-
-    return query.all(), search_meta
+    return query.paginate(pg, per_pg), search_meta
 
 
 def update_book_with_form_data(book_instance, form):

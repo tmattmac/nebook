@@ -1,12 +1,13 @@
 <div class="search-toggle-container w-100 text-center border-top border-muted">
-  <a class="search-toggle text-muted" data-toggle="collapse" href="#book-search-form-container" role="button" aria-expanded="{{'true' if search_meta else 'false'}}" aria-controls="book-search-form-container">Search</a>
+  <a class="search-toggle text-muted" data-toggle="collapse" href="#book-search-form-container" role="button" aria-expanded="{{'true' if ref_search else 'false'}}" aria-controls="book-search-form-container">Search</a>
 </div>
 
-<div class="bg-light rounded col collapse {{'show' if search_meta else ''}}" id="book-search-form-container">
+<div class="bg-light rounded col collapse {{'show' if ref_search else ''}}" id="book-search-form-container">
   <form id="book-search-form" class="w-100">
+    <input type="hidden" name="ref" value="search">
     <div class="d-flex align-items-stretch align-items-md-end flex-column flex-wrap flex-md-row my-3">
       <div class="form-group mb-3 mr-md-4 flex-grow-1">
-        <label for="book-search-input">Search Term</label>
+        <label for="book-search-input">Search Term </label>
         {{form.q(class_='form-control', id_='book-search-input')}}
       </div>
 

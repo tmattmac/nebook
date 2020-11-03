@@ -1,0 +1,50 @@
+{% set args = dict(request.args) %}
+{% set _ = args.pop('pg') if args.pg %}
+
+<nav aria-label="pagination">
+  <ul class="pagination justify-content-center">
+    {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{url_for('index', pg=pagination.prev_num, **args)}}">
+          Prev
+        </a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Prev</span>
+      </li>
+    {% endif %}
+
+    {% for page in pagination.iter_pages() %}
+      {% if page %}
+        {% if page != pagination.page %}
+          <li class="page-item">
+            <a class="page-link" href="{{url_for('index', pg=page, **args)}}">{{page}}</a>
+          </li>
+        {% else %}
+          <li class="page-item active">
+            <span class="page-link"">{{page}}</span>
+            <span class="sr-only">(current)</span>
+          </li>
+        {% endif %}
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&#8230;</span>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{url_for('index', pg=pagination.next_num, **args)}}">
+          Next
+        </a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Next</span>
+      </li>
+    {% endif %}
+  </ul>
+
+</nav>

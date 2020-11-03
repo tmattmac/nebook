@@ -34,27 +34,36 @@ app.register_blueprint(ajax, url_prefix='/api')
 @login_required
 def index():
 
+    # TODO: Populate form only if user searched
+    ref_search = True if request.args.get('ref') == 'search' else False
     form = BookSearchForm(
         formdata=request.args,
         meta={'csrf': False}
     )
 
-    books, search_meta = build_query(current_user, **form.data)
+    try:
+        pg = int(request.args['pg'])
+    except:
+        pg = 1
+    books, search_meta = build_query(
+        current_user,
+        pg=pg,
+        **form.data
+    )
 
+    # TODO: Cache these somehow
     form.author.choices = [(a.id, a.name) for a in get_authors(current_user.id)]
     form.tag.choices = [(t.id, t.tag_name) for t in get_tags(current_user.id)]
 
     session['view'] = request.args.get('view') or session.get('view', 'grid')
 
-    # TODO: Store folder ID in session
-    #folderId = gdrive.get_app_folder_id(credentials)
-    #files = gdrive.get_all_epub_file_ids(credentials)
-
     return render_template(
         'index.html',
-        books=books,
+        books=books.items,
+        pagination=books,
         search_meta=search_meta,
-        form=form
+        form=form,
+        ref_search=ref_search
     )
 
 @app.route('/book/<book_id>')
