@@ -6,8 +6,9 @@ UBP | Edit details for {{book.title}}
 
 {% block content %}
 
-<h2>Edit details for {{book.title}}</h2>
-
+<div class="mb-5 text-center">
+  <h2>Edit details for {{book.title}}</h2>
+</div>
 <form method="POST">
 {{ form.hidden_tag() }}
 {% for field in form %}

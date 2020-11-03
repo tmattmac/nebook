@@ -13,8 +13,10 @@
   <p>You will need to authorize access to Google Drive to manage your ebooks.<p>
   <a href="{{url_for('gdrive_authorize')}}" id="gdrive_authorize" class="btn btn-primary">Authorize</a>
 {% else %}
-  <h2 class="text-center">{{page_title}}</h2>
-  <div class="row">
+  <div class="text-center mb-5">
+    <h2>{{page_title}}</h2>
+  </div>
+  <div class="row mb-4">
     {% include 'book/search-form.html' %}
   </div>
   {% if books %}
