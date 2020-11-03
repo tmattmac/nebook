@@ -1,4 +1,10 @@
+
+
 @import "../node_modules/bootstrap/scss/bootstrap";
+
+html {
+    overflow-y: scroll;
+}
 
 .flush-list {
     list-style: none;
@@ -37,11 +43,12 @@
 
 .cover-image-container img {
     width: 100%;
-    object-fit: cover;
+    height: 100%;
+    object-fit: contain;
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    // left: 50%;
+    // top: 50%;
+    // transform: translate(-50%, -50%);
 }
 
 .cover-image-container .book-cover-text {
@@ -52,18 +59,23 @@
     padding: 1em 0.5em;
 }
 
-.cover-image-container .read-link {
+.book-card {
+    position: relative;
+}
+
+.book-card .read-link {
     display: none;
     position: absolute;
     top: 0.25em;
     right: 0.25em;
     padding: 0.5em;
     background-color: rgba(0,0,0,0.9);
+    z-index: 10;
+    font-weight: bold;
 }
 
-.cover-image-container:hover .read-link {
+.book-card:hover .read-link {
     display: block;
-    font-weight: bold;
 }
 
 .search-toggle-container {
@@ -89,4 +101,20 @@
 .flex-break {
     width: 0;
     flex-basis: 100%;
+}
+
+table .w-40 {
+    width: 40%;
+}
+
+table .w-30 {
+    width: 30%;
+}
+
+table .w-20 {
+    width: 20%;
+}
+
+table .w-10 {
+    width: 10%;
 }

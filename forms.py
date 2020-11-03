@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, IntegerField, TextAreaField, SelectField, HiddenField, SelectMultipleField
 from lib.wtf_taglist import TagListField
+from wtforms.widgets.core import HTMLString, html_params
 from wtforms.validators import Length, DataRequired, Email, NumberRange
 from datetime import datetime
 

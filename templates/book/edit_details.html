@@ -7,7 +7,7 @@ UBP | Edit details for {{book.title}}
 {% block content %}
 
 <div class="mb-5 text-center">
-  <h2>Edit details for {{book.title}}</h2>
+  <h2>Edit details for <b>{{book.title}}</b></h2>
 </div>
 <form method="POST">
 {{ form.hidden_tag() }}
@@ -15,7 +15,12 @@ UBP | Edit details for {{book.title}}
   {% if field.widget.input_type != 'hidden' %}
     <div class="form-group">
       {{field.label}}
-      {{field(class_='form-control')}}
+      {% if not field.errors %}
+        {{field(class_='form-control')}}
+      {% else %}
+        {{field(class_='form-control is-invalid')}}
+        <div class="invalid-feedback">{{field.errors[0]}}</div>
+      {% endif %}
     </div>
   {% endif %}
 {% endfor %}

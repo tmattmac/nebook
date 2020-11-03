@@ -4,20 +4,21 @@
   {% for book in books %}
     <div class="col-6 col-md-3 col-lg-2 p-3">
       <div class="book-card">
-        <div class="cover-image-container">
+        <div class="cover-image-container bg-light rounded shadow-sm">
           {% if book.cover_image %}
-            <img class="rounded" src="{{book.cover_image}}" alt="{{book.title}} cover">
+            <img src="{{book.cover_image}}" alt="{{book.title}} cover">
           {% else %}
-            <img class="bg-dark rounded" src="{{url_for('static', filename='blank-cover.png')}}">
+            <img class="bg-dark" src="{{url_for('static', filename='blank-cover.png')}}">
             <div class="book-cover-text text-white text-center">
               <p class="font-weight-bold">{{book.title}}</p>
               <p>{{book.authors[0]}}</p>
             </div>
           {% endif %}
-          <a class="read-link rounded text-white" a href="{{url_for('reader.reader_view', book_id=book.gdrive_id)}}" target="_blank" rel="noopener noreferrer">Read</a>
         </div>
+        <a class="read-link rounded text-white" href="{{url_for('reader.reader_view', book_id=book.gdrive_id)}}" target="_blank" rel="noopener noreferrer">Read</a>
+        <a href="{{url_for('book_details', book_id=book.gdrive_id)}}" class="book-card-title stretched-link">{{book.title}}</a>
       </div>
-      <a href="{{url_for('book_details', book_id=book.gdrive_id)}}" class="book-card-title">{{book.title}}</a>
+      
     </div>
   {% endfor %}
 </div>

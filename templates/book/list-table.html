@@ -3,18 +3,18 @@
 <table class="table table-hover">
   <thead>
     <tr>
-      <th scope="col">Title</th>
-      <th scope="col">Authors</th>
-      <th scope="col">Tags</th>
-      <th scope="col">Read Link</th>
+      <th scope="col" class="w-auto">Title</th>
+      <th scope="col" class="d-none d-md-table-cell w-20">Author(s)</th>
+      <th scope="col" class="d-none d-md-table-cell w-20">Tag(s)</th>
+      <th scope="col" class="w-10">Read</th>
     </tr>
   </thead>
   <tbody>
     {% for book in books %}
       <tr data-book-id="{{book.gdrive_id}}">
         <td><a href="{{url_for('book_details', book_id=book.gdrive_id)}}">{{book.title}}</a></td>
-        <td>{{author_list(book.authors, with_links=true)}}</td>
-        <td>{{tag_list(book.tags)}}</td>
+        <td class="d-none d-md-table-cell">{{author_list(book.authors, with_links=true)}}</td>
+        <td class="d-none d-md-table-cell">{{tag_list(book.tags)}}</td>
         <td><a href="{{url_for('reader.reader_view', book_id=book.gdrive_id)}}" target="_blank" rel="noopener noreferrer">Read</a></td>
       </tr>
     {% endfor %}

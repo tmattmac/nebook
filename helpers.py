@@ -11,7 +11,7 @@ SORT_FIELDS = {
         'author': Author.name
     }
 
-DEFAULT_PER_PAGE = 1
+DEFAULT_PER_PAGE = 50
 
 def build_query(user, **kwargs):
     """
@@ -44,14 +44,18 @@ def build_query(user, **kwargs):
         # TODO: Try-except block
         query = query.filter(UserBook.authors.any(Author.id.in_(author)))
         if len(author) == 1:
-            search_meta['author'] = Author.query.get(author[0]).name
+            author_instance = Author.query.get(author[0])
+            if author_instance and author_instance.user_id == user.id:
+                search_meta['author'] = author_instance.name
         else:
             search_meta['author'] = '(multiple authors)'
             
     if tag:
         query = query.filter(UserBook.tags.any(Tag.id.in_(tag)))
         if len(tag) == 1:
-            search_meta['tag'] = Tag.query.get(tag[0]).tag_name
+            tag_instance = Tag.query.get(tag[0])
+            if tag_instance and tag_instance.user_id == user.id:
+                search_meta['tag'] = tag_instance.tag_name
         else:
             search_meta['tag'] = '(multiple tags)'
 
@@ -69,8 +73,8 @@ def build_query(user, **kwargs):
         query = query.filter(or_(
             UserBook.title.ilike(q),
             UserBook.publisher.ilike(q),
-            Tag.tag_name.ilike(q),
-            Author.name.ilike(q)
+            UserBook.authors.any(Author.name.ilike(q)),
+            UserBook.tags.any(Tag.tag_name.ilike(q))
         ))
 
     if not sort or sort not in SORT_FIELDS:
@@ -93,7 +97,7 @@ def build_query(user, **kwargs):
     #         .limit(per_pg)\
     #         .offset(pg * per_pg)
 
-    return query.paginate(pg, per_pg), search_meta
+    return query.paginate(pg, per_pg, error_out=False), search_meta
 
 
 def update_book_with_form_data(book_instance, form):
@@ -132,7 +136,8 @@ def remove_page_curl(url):
     '''Remove edge=curl parameter from Google Books API cover image'''
     parsed_url = list(urlparse(url))
     query = parse_qs(parsed_url[4])
-    query.pop('edge')
+    if 'edge' in query:
+        query.pop('edge')
     parsed_url[4] = urlencode(query, doseq=True)
     new_url = urlunparse(parsed_url)
     return new_url
