@@ -9,29 +9,29 @@ class UserLoginForm(FlaskForm):
 
     username = StringField(
         'Username',
-        validators=[DataRequired()]
+        validators=[DataRequired('Username is required')]
     )
 
     password=PasswordField(
         'Password',
-        validators=[DataRequired(), Length(min=8)]
+        validators=[DataRequired('Password is required'), Length(min=8)]
     )
 
 class UserRegisterForm(FlaskForm):
 
     username = StringField(
         'Username',
-        validators=[DataRequired()]
+        validators=[DataRequired('Username is required')]
     )
 
     email = StringField(
         'Email address',
-        validators=[DataRequired(), Email()]
+        validators=[DataRequired('Email is required'), Email()]
     )
 
     password=PasswordField(
         'Password',
-        validators=[DataRequired(), Length(min=8)]
+        validators=[DataRequired('Password is required'), Length(min=8)]
     )
 
 class EditBookDetailForm(FlaskForm):

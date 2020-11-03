@@ -12,7 +12,12 @@
   {% for field in form if field.widget.input_type != 'hidden' %}
     <div class="form-group">
       {{field.label}}
-      {{field(class_='form-control')}}
+      {% if not field.errors %}
+        {{field(class_='form-control')}}
+      {% else %}
+        {{field(class_='form-control is-invalid')}}
+        <div class="invalid-feedback">{{field.errors[0]}}</div>
+      {% endif %}
     </div>
   {% endfor %}
   <button class='btn btn-primary'>Register</button>

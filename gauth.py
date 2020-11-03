@@ -1,6 +1,6 @@
 from app import app
 from models import db
-from flask import Blueprint, redirect, url_for, session
+from flask import Blueprint, redirect, url_for, session, request
 from flask_login import login_required, current_user
 
 import google.oauth2.credentials
@@ -20,6 +20,11 @@ GDRIVE_SCOPES = [
     'https://www.googleapis.com/auth/drive.metadata.readonly',
     'https://www.googleapis.com/auth/drive.file'
 ]
+
+@app.route('/gdrive')
+@login_required
+def gdrive_acknowledge():
+    return
 
 @app.route('/gdrive-authorize')
 @login_required
