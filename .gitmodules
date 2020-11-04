@@ -1,4 +1,0 @@
-[submodule "reader"]
-	path = reader
-	url = ./reader
-	branch = master
