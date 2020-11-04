@@ -1,4 +1,4 @@
 [submodule "reader"]
 	path = reader
-	url = ./reader
+	url = https://github.com/futurepress/epubjs-reader
 	branch = main
