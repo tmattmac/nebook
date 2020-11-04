@@ -10,15 +10,15 @@ import gbooks
 
 app = Flask(__name__)
 
-# TODO: Update config to use env vars
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///book_project'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL', 'postgres:///book_project')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'somesecretkey')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
-app.config['SECRET_KEY'] = 'somesecretkey'
 
 # TODO: Disable these in production
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+# app.config['SQLALCHEMY_ECHO'] = True
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 connect_db(app)
 
