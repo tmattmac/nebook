@@ -29,8 +29,6 @@ def login():
 
         login_user(user, remember=True)
 
-        # TODO: Validate value of 'next'
-        next = session['next']
         return redirect(url_for('index'))
 
     return render_template('auth/login.html', form=form)
@@ -56,5 +54,6 @@ def register():
 @login_required
 def logout():
 
+    session.clear()
     logout_user()
     return redirect(url_for('login'))

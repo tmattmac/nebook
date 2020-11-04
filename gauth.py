@@ -1,6 +1,6 @@
 from app import app
 from models import db
-from flask import Blueprint, redirect, url_for, session, request
+from flask import Blueprint, redirect, url_for, session, request, render_template, flash
 from flask_login import login_required, current_user
 
 import google.oauth2.credentials
@@ -21,10 +21,10 @@ GDRIVE_SCOPES = [
     'https://www.googleapis.com/auth/drive.file'
 ]
 
-@app.route('/gdrive')
+@app.route('/gdrive-acknowledge')
 @login_required
 def gdrive_acknowledge():
-    return
+    return render_template('gauth/gdrive-acknowledge.html')
 
 @app.route('/gdrive-authorize')
 @login_required
@@ -59,7 +59,12 @@ def gdrive_callback():
     flow.redirect_uri = url_for('gdrive_callback', _external=True)
 
     authorization_response = request.url
-    flow.fetch_token(authorization_response=authorization_response)
+    try:
+        flow.fetch_token(authorization_response=authorization_response)
+    except:
+        flash('You must provide permission to make full use \
+            of this application\'s features.', 'danger')
+        return redirect(url_for('gdrive_acknowledge'))
 
     credentials = flow.credentials
     session['access_token'] = credentials.token
@@ -71,8 +76,8 @@ def gdrive_callback():
     try:
         db.session.commit()
     except:
-        # TODO: Handle database errors
-        pass
+        db.session.rollback()
+
     return redirect(url_for('index'))
 
 def create_credentials(user, access_token=None):

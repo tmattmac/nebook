@@ -4,6 +4,7 @@ from models import *
 import os
 from forms import EditBookDetailForm, BookSearchForm
 from helpers import *
+import google
 import gdrive
 import gbooks
 
@@ -96,16 +97,20 @@ def edit_book_details(book_id):
 @login_required
 def upload_ebook_file():
     
-    if not current_user.gdrive_permission_granted:
-        return redirect(url_for('index'))
+    try:
+        credentials = gauth.create_credentials(
+            user=current_user,
+            access_token=session.get('access_token')
+        )
+    except google.auth.exceptions.RefreshError as error:
+        return redirect(url_for('gdrive_acknowledge'))
+
+
+    # if not current_user.gdrive_permission_granted:
+    #     return redirect(url_for('index'))
         
     if request.method == 'GET':
         return render_template('book/upload.html')
-
-    credentials = gauth.create_credentials(
-        user=current_user,
-        access_token=session.get('access_token')
-    )
 
     file = request.files['file']
     try:
@@ -152,6 +157,15 @@ def upload_ebook_file():
 @app.route('/book/<book_id>/delete', methods=['GET', 'POST'])
 @login_required
 def delete_book(book_id):
+
+    try:
+        credentials = gauth.create_credentials(
+            user=current_user,
+            access_token=session.get('access_token')
+        )
+    except google.auth.exceptions.RefreshError as error:
+        return redirect(url_for('gdrive_acknowledge'))
+
     book = UserBook.query.get_or_404({
         'user_id': current_user.id,
         'gdrive_id': book_id
@@ -159,11 +173,6 @@ def delete_book(book_id):
     
     if request.method == 'GET':
         return render_template('book/delete-confirm.html', book=book)
-
-    credentials = gauth.create_credentials(
-        user=current_user,
-        access_token=session.get('access_token')
-    )
 
     gdrive_id = book.gdrive_id
     try:
