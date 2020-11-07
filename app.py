@@ -7,6 +7,7 @@ from helpers import *
 import google
 import gdrive
 import gbooks
+import secrets
 
 app = Flask(__name__)
 
@@ -115,18 +116,18 @@ def upload_ebook_file():
     file = request.files['file']
     try:
         metadata = extract_metadata_from_epub(file)
-    except RuntimeError:
-        flash('Not a valid ebook file', 'danger')
+    except:
+        flash('Not a valid epub file', 'danger')
         return redirect(url_for('upload_ebook_file'))
 
     book_api_data = gbooks.get_book_by_title_author(
         metadata['title'], metadata['authors'][0]
     )
 
-    #--------------DISABLED FOR DEVELOPMENT------------------------------------
-    book_gdrive_id = gdrive.generate_file_id(credentials)
-    # book_gdrive_id = str(current_user.id) + book_info.get('id')
-    #--------------------------------------------------------------------------
+    if not app.config['BYPASS_UPLOAD']:
+        book_gdrive_id = gdrive.generate_file_id(credentials)
+    else:
+        book_gdrive_id = book_info.get('id') + secrets.token_urlsafe(20)
 
     if book_api_data:
         book = book_model_from_api_data(current_user.id, book_api_data)
@@ -142,13 +143,14 @@ def upload_ebook_file():
             publication_year = metadata.get('publication_year')
         )
     book.gdrive_id = book_gdrive_id
-    gdrive.upload_file(
-        credentials,
-        file,
-        f'{book.title} - {book.authors[0]}',
-        gdrive.get_app_folder_id(credentials),
-        book_gdrive_id
-    )
+    if not app.config['BYPASS_UPLOAD']:
+        gdrive.upload_file(
+            credentials,
+            file,
+            f'{book.title} - {book.authors[0]}',
+            gdrive.get_app_folder_id(credentials),
+            book_gdrive_id
+        )
     db.session.add(book)
     db.session.commit()
 
