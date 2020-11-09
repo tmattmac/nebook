@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # TODO: Disable these in production
 # app.config['SQLALCHEMY_ECHO'] = True
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 connect_db(app)
