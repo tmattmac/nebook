@@ -16,6 +16,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'somesecretkey')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+app.config['BYPASS_UPLOAD'] = False
+
 # TODO: Disable these in production
 # app.config['SQLALCHEMY_ECHO'] = True
 # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
