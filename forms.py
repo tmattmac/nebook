@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, IntegerField, TextAreaField, SelectField, HiddenField, SelectMultipleField
 from lib.wtf_taglist import TagListField
 from wtforms.widgets.core import HTMLString, html_params
-from wtforms.validators import Length, DataRequired, Email, NumberRange
+from wtforms.validators import Length, DataRequired, Email, NumberRange, Optional
 from datetime import datetime
 
 class UserLoginForm(FlaskForm):
@@ -47,7 +47,7 @@ class EditBookDetailForm(FlaskForm):
 
     publication_year = IntegerField(
         'Publication Year',
-        validators=[NumberRange(min=0, max=datetime.now().year)]
+        validators=[Optional(), NumberRange(min=0, max=datetime.now().year)]
     )
 
     comments = TextAreaField('Comments')

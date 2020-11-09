@@ -34,7 +34,10 @@ class User(db.Model, UserMixin):
 
     gdrive_permission_granted = db.Column(db.Boolean)
 
-    books = db.relationship('UserBook', primaryjoin='User.id==UserBook.user_id')
+    books = db.relationship(
+        'UserBook',
+        primaryjoin='User.id==UserBook.user_id',
+        cascade='save-update, merge, delete, delete-orphan')
 
     def add_book(self, book_id, gdrive_id):
 
@@ -74,6 +77,7 @@ class User(db.Model, UserMixin):
             db.session.commit()
             return new_user
         except IntegrityError:
+            db.session.rollback()
             return False
 
 class Author(db.Model):

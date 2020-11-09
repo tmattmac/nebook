@@ -99,7 +99,7 @@ def build_query(user, **kwargs):
 
     return query.paginate(pg, per_pg, error_out=False), search_meta
 
-
+# TODO: After implementing association proxy, use populate_obj instead
 def update_book_with_form_data(book_instance, form):
     book = {
         'title':            form.title.data,
@@ -193,6 +193,8 @@ def extract_metadata_from_epub(file_handle):
     if date:
         metadata['publication_year'] = parse_year(date[0])
 
+    epub.close()
+    
     return metadata
 
 def get_tags(user_id):

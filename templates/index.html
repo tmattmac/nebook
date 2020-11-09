@@ -5,7 +5,7 @@
 {% set page_title = 'Search Results' if ref_search else search_title(search_meta) %}
 
 
-{% block title %}UBP | {{page_title}}{% endblock %}
+{% block title %}{{page_title}}{% endblock %}
 
 {% block content %}
   {% for category, msg in get_flashed_messages(with_categories=true) %}

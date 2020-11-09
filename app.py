@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # TODO: Disable these in production
 # app.config['SQLALCHEMY_ECHO'] = True
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 connect_db(app)
@@ -98,17 +98,15 @@ def edit_book_details(book_id):
 @login_required
 def upload_ebook_file():
     
-    try:
-        credentials = gauth.create_credentials(
-            user=current_user,
-            access_token=session.get('access_token')
-        )
-    except google.auth.exceptions.RefreshError as error:
-        return redirect(url_for('gdrive_acknowledge'))
-
-
-    # if not current_user.gdrive_permission_granted:
-    #     return redirect(url_for('index'))
+    # TODO: Refactor everything that checks for config
+    if not app.config['TESTING']:
+        try:
+            credentials = gauth.create_credentials(
+                user=current_user,
+                access_token=session.get('access_token')
+            )
+        except google.auth.exceptions.RefreshError as error:
+            return redirect(url_for('gdrive_acknowledge'))
         
     if request.method == 'GET':
         return render_template('book/upload.html')
@@ -122,12 +120,12 @@ def upload_ebook_file():
 
     book_api_data = gbooks.get_book_by_title_author(
         metadata['title'], metadata['authors'][0]
-    )
+    ) if not app.config['TESTING'] else None
 
     if not app.config['BYPASS_UPLOAD']:
         book_gdrive_id = gdrive.generate_file_id(credentials)
     else:
-        book_gdrive_id = book_info.get('id') + secrets.token_urlsafe(20)
+        book_gdrive_id = metadata.get('title') + secrets.token_urlsafe(20)
 
     if book_api_data:
         book = book_model_from_api_data(current_user.id, book_api_data)
@@ -160,13 +158,14 @@ def upload_ebook_file():
 @login_required
 def delete_book(book_id):
 
-    try:
-        credentials = gauth.create_credentials(
-            user=current_user,
-            access_token=session.get('access_token')
-        )
-    except google.auth.exceptions.RefreshError as error:
-        return redirect(url_for('gdrive_acknowledge'))
+    if not app.config['TESTING']:
+        try:
+            credentials = gauth.create_credentials(
+                user=current_user,
+                access_token=session.get('access_token')
+            )
+        except google.auth.exceptions.RefreshError as error:
+            return redirect(url_for('gdrive_acknowledge'))
 
     book = UserBook.query.get_or_404({
         'user_id': current_user.id,
@@ -177,13 +176,15 @@ def delete_book(book_id):
         return render_template('book/delete-confirm.html', book=book)
 
     gdrive_id = book.gdrive_id
+
     try:
         db.session.delete(book)
         db.session.commit()
     except:
         db.session.rollback()
     
-    gdrive.delete_file(credentials, gdrive_id)
+    if not app.config['BYPASS_UPLOAD']:
+        gdrive.delete_file(credentials, gdrive_id)
     # try:
     #     gdrive.delete_file(credentials, gdrive_id)
     # except:

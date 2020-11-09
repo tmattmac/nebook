@@ -3,7 +3,14 @@
 {% block title %}Upload Book{% endblock %}
 
 {% block content %}
-<h2>Upload Book</h2>
+{% for category, msg in get_flashed_messages(with_categories=true) %}
+  <div class="alert alert-{{category}}" role="alert">
+    {{msg}}
+  </div>
+{% endfor %}
+<div class="text-center mb-5">
+  <h2>Upload Book</h2>
+</div>
 <form method="POST" action="/upload" enctype="multipart/form-data">
   <label for="fileUpload">Please select an epub file.</label>
   <input type="file" id="fileUpload" name="file" class="form-control-file my-3">
