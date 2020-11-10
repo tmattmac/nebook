@@ -4,7 +4,7 @@
 
 ## Demo
 
-A demo is available at https://untitled-book-project.herokuapp.com/.
+A demo is available at https://nebook.herokuapp.com/.
 
 ## Initial Proposal
 
