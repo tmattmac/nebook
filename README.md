@@ -4,7 +4,7 @@
 
 ## Demo
 
-A demo is available at https://nebook.herokuapp.com/.
+A demo is available at https://nebook.herokuapp.com/. Free, public-domain epub files can be downloaded from [Project Gutenberg](https://www.gutenberg.org/browse/scores/top)
 
 ## Initial Proposal
 
