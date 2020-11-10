@@ -1,5 +1,7 @@
 # nebook - Web-Based E-reader
 
+![nebook screen capture](https://i.imgur.com/neIDLxc.png)
+
 ## Demo
 
 A demo is available at https://untitled-book-project.herokuapp.com/.
