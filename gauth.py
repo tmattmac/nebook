@@ -38,7 +38,8 @@ def gdrive_authorize():
     
     auth_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true'
+        include_granted_scopes='true',
+        prompt='consent'
     )
 
     session['state'] = state
@@ -55,7 +56,7 @@ def gdrive_callback():
         scopes=GDRIVE_SCOPES,
         state=state
     )
-
+    #breakpoint()
     flow.redirect_uri = url_for('gdrive_callback', _external=True)
 
     authorization_response = request.url

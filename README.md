@@ -52,7 +52,7 @@ I relied on Google Drive to store users' books. I also used the Google Books API
 
 ## Testing
 
-In the top-level directory, run:
+Requires a postgres database named `book_project_test`. In the top-level directory, run:
 
 ```
 python3 -m unittest

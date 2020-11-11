@@ -51,6 +51,9 @@ class UserRoutesTestCase(TestCase):
         TEST_USER_INSTANCE.books = []
         db.session.commit()
 
+    def tearDownClass(self):
+        db.drop_all()
+
     def test_empty_index_page(self):
         with app.test_client() as client:
 
